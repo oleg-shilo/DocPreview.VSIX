@@ -1,0 +1,130 @@
+﻿<UserControl x:Class="DocPreview.PreviewWindowControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.14.0"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             Name="MyToolWindow"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <!--<Grid Background="#FFD4DFFF">-->
+    <!--http://stackoverflow.com/questions/7231186/how-can-i-find-out-when-visual-studio-theme-color-changes-->
+    <Grid Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
+        <WebBrowser x:Name="Browser"
+                    Margin="0,20,0,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" />
+        <CheckBox x:Name="AutoRefresh"
+                  Margin="5,3"
+                  HorizontalAlignment="right"
+                  Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                  VerticalAlignment="Top"
+                  Checked="AutoRefresh_Checked"
+                  ToolTip="Trigger refreshes by cursor position changes.">
+            Auto refresh
+        </CheckBox>
+
+        <Grid x:Name="Refresh"
+              Margin="5"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Top"
+              Cursor="Hand"
+              MouseLeftButtonDown="Grid_MouseLeftButtonDown"
+              ToolTip="Refresh documentation form the active document caret position">
+            <Rectangle HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
+                       Fill="White"
+                       Opacity="0.01"
+                       ToolTip="{Binding Tooltip,
+                                         ElementName=Refresh}" />
+            <Path Width="12"
+                  Height="12"
+                  Margin="0,0,0,0"
+                  Data="M7.5157686,16.529112C7.7549473,16.534241,8.0181313,16.71569,8.2613803,17.082534L21.938303,31.323391C22.077704,31.533193 22.161104,31.741392 22.191004,31.941192 22.378502,33.191898 20.582911,32.991997 19.394114,32.565695L14.124631,30.675589C13.743232,30.541488 13.334233,30.84429 13.426634,31.23489 14.796529,37.124214 18.829115,42.253134 24.774395,44.708244 30.245676,46.953053 36.151955,46.436049 41.03994,43.827438 41.584137,43.537638 41.900536,42.968037 42.082836,42.376932 42.765232,40.172325 44.815826,38.572718 47.24432,38.572718 50.228706,38.572718 52.647999,40.992027 52.647999,43.97644 52.647999,46.961452 50.228706,49.380762 47.24432,49.380762 46.604923,49.380762 45.95652,49.473162 45.405827,49.798765 38.47625,53.887281 29.874577,54.831385 21.952704,51.570868 14.110231,48.350756 8.6910687,41.736233 6.5908266,34.064301 6.4736367,33.630701 5.9671083,33.421196 5.6129499,33.693899L2.8903082,35.802607C1.8916223,36.57601 0.2666278,37.397715 0.024440833,36.15741 -0.01462126,35.960209 -0.0081210418,35.733007 0.05306632,35.484907L6.8056656,17.364436C6.9404231,16.807389,7.2082544,16.522517,7.5157686,16.529112z M32.378216,0.0010623932C35.609257,0.030261993 38.881496,0.66186428 42.044758,1.9622984 49.889851,5.1841774 55.313114,11.796762 57.408238,19.470462 57.526638,19.903457 58.031845,20.113754 58.387348,19.840257L61.108883,17.732384C62.107494,16.958795 63.73381,16.134605 63.976116,17.37479 64.015114,17.572687 64.007217,17.799384 63.946014,18.047381L58.130947,36.172047C57.886044,37.164333,57.229836,37.289932,56.670029,36.447542L42.06546,22.209427C41.925057,22.00113 41.841656,21.790732 41.810257,21.588835 41.620354,20.340251 43.418476,20.544648 44.607288,20.971243L49.874249,22.858519C50.253254,22.995117 50.66206,22.692521 50.570759,22.299826 49.204941,16.408002 45.168495,11.281868 39.223126,8.8227997 33.72176,6.5728388 27.780293,7.1073723 22.876434,9.753788 22.341429,10.041584 21.997725,10.573477 21.781422,11.14247 21.010613,13.186044 19.04059,14.640525 16.728064,14.640525 13.742428,14.640525 11.323,12.221356 11.323,9.2368946 11.323,6.2519131 13.742428,3.8320246 16.728064,3.8320246 16.907765,3.8320246 17.086166,3.8424644 17.260569,3.8600445 17.842577,3.9213238 18.435083,3.8165245 18.944189,3.5260582 23.021637,1.2025137 27.655926,-0.04160881 32.378216,0.0010623932z"
+                  Fill="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                  MouseLeftButtonDown="Grid_MouseLeftButtonDown"
+                  RenderTransformOrigin="0.5,0.5"
+                  Stretch="Uniform"
+                  ToolTip="{Binding Tooltip,
+                                    ElementName=Refresh}">
+                <Path.RenderTransform>
+                    <TransformGroup>
+                        <TransformGroup.Children>
+                            <RotateTransform Angle="180" />
+                            <ScaleTransform ScaleX="1" ScaleY="-1" />
+                        </TransformGroup.Children>
+                    </TransformGroup>
+                </Path.RenderTransform>
+            </Path>
+        </Grid>
+        <Grid x:Name="ViewAll"
+              Margin="40,5"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Top"
+              Cursor="Hand"
+              MouseLeftButtonDown="OpenForAll_MouseLeftButtonDown"
+              ToolTip="Generate (and open) merged complete documentation for the active document">
+            <Rectangle HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
+                       Fill="White"
+                       Opacity="0.01"
+                       ToolTip="{Binding Tooltip,
+                                         ElementName=ViewAll}" />
+            <!--  Data="M0,17.427001L23.236452,17.427001 23.236452,23.148313 5.7089882,23.148313 5.7089882,58.278587 40.763865,58.278587 40.763865,40.762951 46.473002,40.762951 46.473002,64 0,64z M29.046001,11.618L46.617001,11.618 52.382,11.618 52.383,11.618 52.383,34.954 46.617001,34.954 46.617001,21.48282 25.344744,42.755001 21.268002,38.678171 42.363248,17.583 29.046001,17.583z M17.427,0L58.291,0 64,0 64,5.7080002 64,46.573002 58.291,46.573002 58.291,5.7080002 17.427,5.7080002z"  -->
+            <Path Width="12"
+                  Height="12"
+                  Margin="0,0,0,0"
+                  Data="M45.963548,8.269645L62.665147,25.065546 45.963548,39.871244 45.963548,31.963644C45.963548,31.963644 17.120617,24.075571 9.909945,39.871244 9.9099454,35.922571 12.530199,16.167482 45.963548,16.167483z M0,0L41.778571,0 41.778571,4.1795139 41.778571,8.3590277 37.598714,8.3590277 37.598714,4.1795139 4.1798577,4.1795139 4.1798577,45.954649 37.598714,45.954649 37.598714,41.775137 41.778571,41.775137 41.778571,45.954649 41.778571,50.134165 37.598714,50.134165 0,50.134165 0,45.954649 0,4.1795139z"
+                  Fill="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                  MouseLeftButtonDown="Grid_MouseLeftButtonDown"
+                  RenderTransformOrigin="0.5,0.5"
+                  Stretch="Uniform"
+                  ToolTip="{Binding Tooltip,
+                                    ElementName=ViewAll}">
+                <Path.RenderTransform>
+                    <TransformGroup>
+                        <TransformGroup.Children>
+                            <RotateTransform Angle="180" />
+                            <ScaleTransform ScaleX="-1" ScaleY="-1" />
+                        </TransformGroup.Children>
+                    </TransformGroup>
+                </Path.RenderTransform>
+            </Path>
+        </Grid>
+
+        <Grid x:Name="About"
+              Margin="20,5"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Top"
+              Cursor="Hand"
+              MouseLeftButtonDown="About_MouseLeftButtonDown"
+              ToolTip="About DocPreview">
+            <Rectangle HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
+                       Fill="White"
+                       Opacity="0.01"
+                       ToolTip="{Binding Tooltip,
+                                         ElementName=About}" />
+            <!--  Data="M9.497,15.596L11.233,15.596 11.233,17.49 9.497,17.49z M10.523905,3.8440003C11.680103,3.8440001 12.574702,4.1590176 13.206101,4.791843 13.8884,5.4741699 14.231,6.3426607 14.231,7.3935263 14.231,8.2880781 13.9146,9.0496972 13.284301,9.6813023 12.915901,10.049721 12.415902,10.549734 11.784303,11.178749 11.313004,11.65266 11.076004,12.363578 11.076004,13.309L9.655376,13.309C9.655376,12.152672 9.8389657,11.284151 10.207505,10.707337 10.470604,10.286827 10.970603,9.7073033 11.706103,8.9703448 12.126802,8.5510252 12.337703,8.0510128 12.337703,7.4716582 12.337703,6.7372005 12.152802,6.183717 11.784303,5.8153678 11.469203,5.5001104 11.023904,5.3426363 10.444405,5.3426363 9.9705555,5.3426363 9.5760257,5.5001104 9.2621262,5.8153678 8.7361269,6.3426607 8.4730676,7.13046 8.4730676,8.182606L6.6580001,8.182606C6.6579999,6.8153923 7.1058796,5.6837047 7.9991879,4.791843 8.6306573,4.1590176 9.4717159,3.8440001 10.523905,3.8440003z M10.6665,2.0873708C5.9270086,2.0873708 2.0860209,5.9283869 2.0860209,10.66655 2.0860209,15.404884 5.9270086,19.24593 10.6665,19.24593 15.403411,19.24593 19.244438,15.404884 19.244438,10.66655 19.244438,5.9283869 15.403411,2.0873708 10.6665,2.0873708z M10.6665,0C16.546589,0 21.332999,4.7851529 21.332999,10.66655 21.332999,16.548067 16.546589,21.333 10.6665,21.333 4.7837801,21.333 0,16.548067 0,10.66655 0,4.7851529 4.7837801,0 10.6665,0z"  -->
+            <Path Width="12"
+                  Height="12"
+                  Margin="0,0,0,0"
+                  Data="M285.308,622.263L490.959,622.263 490.959,768 285.308,768z M383.461,0C501.526,5E-06 595.41,21.8896 665.113,65.5247 735.017,109.304 769.768,160.138 769.768,218.318 769.768,250.431 756.966,280.817 731.361,309.619 705.756,338.277 651.09,377.304 567.164,426.698 523.678,452.332 496.65,472.926 486.285,488.478 475.718,504.031 471.045,531.825 472.062,572.004L285.308,572.004C284.904,552.994 284.701,541.33 284.701,537.153 284.701,494.383 294.658,459.1 314.572,431.452 334.69,403.801 374.519,372.695 434.671,338.134 494.618,303.572 530.383,280.817 542.169,270.161 560.255,253.169 569.198,234.591 569.198,214.141 569.198,185.772 553.346,161.435 521.441,141.273 489.334,121.112 446.253,110.888 392.198,110.888 339.974,110.888 296.283,121.544 261.127,142.569 225.972,163.594 201.992,195.853 188.782,239.056L0,222.495C5.28372,160.57 42.4707,108.007 111.563,64.804 180.656,21.6013 271.084,5E-06 383.461,0z"
+                  Fill="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                  MouseLeftButtonDown="About_MouseLeftButtonDown"
+                  RenderTransformOrigin="0.5,0.5"
+                  Stretch="Uniform"
+                  ToolTip="{Binding Tooltip,
+                                    ElementName=About}">
+                <Path.RenderTransform>
+                    <TransformGroup>
+                        <TransformGroup.Children>
+                            <ScaleTransform ScaleX="0.8" ScaleY="0.8" />
+                        </TransformGroup.Children>
+                    </TransformGroup>
+                </Path.RenderTransform>
+            </Path>
+        </Grid>
+    </Grid>
+</UserControl>

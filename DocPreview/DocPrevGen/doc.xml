@@ -1,0 +1,84 @@
+     <summary>
+     Wraps C# code fragment into auto-generated class (type name <c>DynamicClass</c>), evaluates it and loads the class to the current AppDomain.
+     <para>Returns non-typed <see cref="T:CSScriptLibrary.MethodDelegate"/> for class-less style of invoking.</para>
+     <para>Paramref tag sample <paramref name="value"/></para>
+     <para>
+     A complex unordered list:
+     <list type="bullet">
+     <item>
+       <term>An item</term>
+       <description>with a description.
+        <code>
+     var product = CSScript.Evaluator
+                           .CreateDelegate&lt;int&gt;(@"int Product(int a, int b)
+                                                 {
+                                                     return a * b;
+                                                 }");
+    
+     int result = product(3, 2);
+     </code></description>
+     </item>
+     <item>
+       <term>Another item</term>
+       <description>with a description.</description>
+     </item>
+     </list>
+     </para>
+</summary>
+
+<remarks>The delimiters characters are ';,(){}'.
+<para>However you should check <see cref="T:csscript.CSharpParser.DirectiveDelimiters"/> for the accurate list of all delimiters.
+</para> 
+<para>
+A simple unordered list:
+<list type="number">
+<item>An item.</item>
+<item>Another item.</item>
+</list>
+</para>
+</remarks>
+
+<remarks>The delimiters characters are ';,(){}'.
+<para>However you should check <see cref="T:csscript.CSharpParser.DirectiveDelimiters"/> for the accurate list of all delimiters.
+</para> 
+<para>
+A simple unordered list:
+<list type="number">
+<item>An item.</item>
+<item>Another item.</item>
+</list>
+</para>
+</remarks>
+<exception cref="ApplicationException">Will throw exception on app error</exception>
+<exception cref="JustBecauseException">Throw exception anytime</exception>
+        
+<permission cref = "T:System.Security.Permissions.StrongNameIdentityPermission" >
+Demands that the caller be signed with the appropriate strong name key.
+</permission>
+<example>
+<code>
+var product = CSScript.Evaluator
+                      .CreateDelegate&lt;int&gt;(@"int Product(int a, int b)
+                                            {
+                                                return a * b;
+                                            }");
+
+int result = product(3, 2);
+</code>
+</example>
+<example>
+<code>
+var product = CSScript.Evaluator
+                      .CreateDelegate&lt;int&gt;(@"int Product(int a, int b)
+                                            {
+                                                return a * b;
+                                            }");
+
+int result = product(3, 2);
+</code>
+</example>
+<typeparam name="T">Type param named T.</typeparam>
+<typeparam name="V">Type param named V.</typeparam>
+<param name="code">The C# code.</param>
+<param name="code2">The C# code.</param>
+<returns>Some return <c>value</c></returns>

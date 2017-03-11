@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="C:\Users\osh\AppData\Roaming\DocPreview\1.0.1.0\css/Contents.css" />
+    <title>Class Method</title>
+</head>
+<body>
+    <div id="Header">
+        <div id="ProjectTitle">Documentation Preview</div>
+        <div id="PageTitle">Class Method</div>
+        <div id="Contents" />
+
+
+     Wraps C# code fragment into auto-generated class (type name <span class="Code">DynamicClass</span>), evaluates it and loads the class to the current AppDomain.
+     <p>Returns non-typed <a href="" >MethodDelegate</a> for class-less style of invoking.</p><p>Paramref tag sample <span class="Code">value</span></p><p>
+     A complex unordered list:
+     <ul><li><strong>An item</strong><br />with a description.
+        <table class="ExampleCodeTable"><col width="100%" /><tr class="CodeTable"><th class="CodeTable">C#</th></tr><tr class="CodeTable"><td class="CodeTable"><pre>
+var product = CSScript.Evaluator
+                      .CreateDelegate&lt;int&gt;(@"int Product(int a, int b)
+                                            {
+                                                return a * b;
+                                            }");
+    
+int result = product(3, 2);
+</pre></td></tr></table></li><li><strong>Another item</strong><br />with a description.</li></ul></p>
+    <div id='SectionHeader0' class='SectionHeader'>
+        <img id='SectionExpanderImg0' src='C:\Users\osh\AppData\Roaming\DocPreview\1.0.1.0\css/BigSquareExpanded.gif' alt='Collapse/Expand' >
+        <span class='SectionHeader'>
+            <span class='ArrowCursor' >
+            Syntax
+            </span>
+        </span>
+    </div>
+
+    <div id='SectionContainerDiv0' class='SectionContainer'>
+    <table class='CodeTable'>
+    <colgroup><col width='100%'></colgroup>
+    <tbody><tr class='CodeTable'><th class='CodeTable'>C#</th></tr><tr class='CodeTable'><td class='CodeTable'><pre style='margin-left: 2px;'>
+public List< T> CreateDelegate<T, V>(string code, V code2)</pre></td></tr></tbody></table>
+<div class='CommentHeader'>Type Parameters</div>
+<div class='CommentParameterName'>T</div><div class='ParameterCommentContainer'>
+Type param named T.
+</div>
+<div class='CommentParameterName'>V</div><div class='ParameterCommentContainer'>
+Type param named V.
+</div>
+
+<div class='CommentHeader'>Parameters</div>
+<div class='CommentParameterName'>code</div><div class='ParameterCommentContainer'>
+The C# code.
+</div>
+<div class='CommentParameterName'>code2</div><div class='ParameterCommentContainer'>
+The C# code.
+</div>
+
+<div class='CommentHeader'>Return Value</div>
+<div class='ParameterCommentContainer'>
+Some return <span class="Code">value</span>
+</div>
+
+
+<div id='SectionHeader1' class='SectionHeader'>
+   <img id='SectionExpanderImg1' src='C:\Users\osh\AppData\Roaming\DocPreview\1.0.1.0\css/BigSquareExpanded.gif' alt='Collapse/Expand' /> 
+   <span class='SectionHeader'>
+       <span class='ArrowCursor'>
+       .NET Framework Security
+       </span>
+   </span>
+</div>
+<div id='SectionContainerDiv1' class='SectionContainer'>
+<table class='MembersTable'>
+<col width='25%' />
+<col width='75%' />
+<tr>
+<th>Permission</th>
+<th>Description</th></tr>
+<tr>
+<td><span class='PseudoLink'>System.Security.Permissions.StrongNameIdentityPermission</span></td>
+<td>
+Demands that the caller be signed with the appropriate strong name key.
+</td>
+</tr>
+</table
+</div>
+</div>
+
+
+<div id='SectionHeader1' class='SectionHeader'>
+   <img id='SectionExpanderImg1' src='C:\Users\osh\AppData\Roaming\DocPreview\1.0.1.0\css/BigSquareExpanded.gif' alt='Collapse/Expand' /> 
+   <span class='SectionHeader'>
+       <span class='ArrowCursor'>
+       Exceptions
+       </span>
+   </span>
+</div>
+<div id='SectionContainerDiv1' class='SectionContainer'>
+<table class='MembersTable'>
+<col width='25%' />
+<col width='75%' />
+<tr>
+<th>Exception</th>
+<th>Condition</th></tr>
+<tr>
+<td><span class='PseudoLink'>ApplicationException</span></td>
+<td>Will throw exception on app error</td>
+</tr>
+<tr>
+<td><span class='PseudoLink'>JustBecauseException</span></td>
+<td>Throw exception anytime</td>
+</tr>
+</table
+</div>
+</div>
+
+
+<div id='SectionHeader1' class='SectionHeader'>
+   <img id='SectionExpanderImg1' src='C:\Users\osh\AppData\Roaming\DocPreview\1.0.1.0\css/BigSquareExpanded.gif' alt='Collapse/Expand' /> 
+   <span class='SectionHeader'>
+       <span class='ArrowCursor'>
+       Remarks
+       </span>
+   </span>
+</div>
+<div id='SectionContainerDiv1' class='SectionContainer'>
+The delimiters characters are ';,(){}'.
+<p>However you should check <a href="" >DirectiveDelimiters</a> for the accurate list of all delimiters.
+</p><p>
+A simple unordered list:
+<ol><li>An item.</li><li>Another item.</li></ol></p>
+The delimiters characters are ';,(){}'.
+<p>However you should check <a href="" >DirectiveDelimiters</a> for the accurate list of all delimiters.
+</p><p>
+A simple unordered list:
+<ol><li>An item.</li><li>Another item.</li></ol></p>
+</div>
+</div>
+
+
+<div id='SectionHeader1' class='SectionHeader'>
+   <img id='SectionExpanderImg1' src='C:\Users\osh\AppData\Roaming\DocPreview\1.0.1.0\css/BigSquareExpanded.gif' alt='Collapse/Expand' /> 
+   <span class='SectionHeader'>
+       <span class='ArrowCursor'>
+       Examples
+       </span>
+   </span>
+</div>
+<div id='SectionContainerDiv1' class='SectionContainer'>
+<table class="ExampleCodeTable"><col width="100%" /><tr class="CodeTable"><th class="CodeTable">C#</th></tr><tr class="CodeTable"><td class="CodeTable"><pre>
+var product = CSScript.Evaluator
+                      .CreateDelegate&lt;int&gt;(@"int Product(int a, int b)
+                                            {
+                                                return a * b;
+                                            }");
+
+int result = product(3, 2);</pre></td></tr></table>
+<table class="ExampleCodeTable"><col width="100%" /><tr class="CodeTable"><th class="CodeTable">C#</th></tr><tr class="CodeTable"><td class="CodeTable"><pre>
+var product = CSScript.Evaluator
+                      .CreateDelegate&lt;int&gt;(@"int Product(int a, int b)
+                                            {
+                                                return a * b;
+                                            }");
+
+int result = product(3, 2);</pre></td></tr></table>
+</div>
+</div>
+
+
+    </div>
+</body>
+</html>
