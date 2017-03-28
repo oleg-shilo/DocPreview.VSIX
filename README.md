@@ -1,8 +1,10 @@
+You can find the extension binaries on the Releases page: https://github.com/oleg-shilo/DocPreview.VSIX/releases
+
 *This is a source code and defect tracking repository only. For all binaries please visit the product [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=OlegShilo.DocPreview-2017) page.*
 
 *This source code is for the Visual Studio 2017 (VS2017) version of the extension. The VS2015 source code is hosted in a separate [repository](https://docpreview.codeplex.com/)*
 
-##Project Description
+## Project Description
 
 There are many products that assist with producing the API Documentation from XML code comments within C# source code. Some of these products are open source and some are proprietary but most of them are doing very good job for what they are designed to do. 
 
