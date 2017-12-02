@@ -205,6 +205,18 @@ namespace DocPreview.Test
             Assert.Equal("<summary> Gets the count. </summary> <typeparam name=\"T\">The type of the T.</typeparam> <param name=\"data\">The data.</param> <returns></returns>", result.XmlDocumentation.Deflate());
         }
 
+        [Fact]
+        public void ParseGenericMethod()
+        {
+            int line = 169;
+
+            var result = Parser.FindMemberDocumentation(code, line);
+
+            Assert.Equal("Method GetCount", result.MemberTitle);
+            Assert.Equal("int GetCount<T>(T data) where T : new()", result.MemberDefinition);
+            Assert.Equal("<summary> Gets the count. </summary> <typeparam name=\"T\">The type of the T.</typeparam> <param name=\"data\">The data.</param> <returns></returns>", result.XmlDocumentation.Deflate());
+        }
+
         //[Fact]
         //public void ParseSeeRefEscping()
         //{

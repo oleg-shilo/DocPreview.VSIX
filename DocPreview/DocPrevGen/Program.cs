@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Xsl;
@@ -14,7 +15,7 @@ using System.Xml.Xsl;
 //Special thanks to Marek Stój for his excellent ImmDoc.NET (https://github.com/marek-stoj/ImmDoc.NET)
 //DocPreview uses the following ImmDoc.NET components:
 //   - XML processing algorithm
-//   - Lists.xslt 
+//   - Lists.xslt
 //   - Default HTML page layout
 
 namespace XmlDocumentation
@@ -32,7 +33,6 @@ namespace XmlDocumentation
             File.WriteAllText(@"..\..\docpreview.html", html);
         }
     }
-
 
     public static class DocPreview
     {
@@ -70,6 +70,7 @@ namespace XmlDocumentation
                                                       "DocPreview",
                                                        Assembly.GetExecutingAssembly().GetName().Version.ToString(),
                                                        "css");
+
         public static string AppDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DocPreview");
 
         public static string GenerateErrorHtml(string errorText = "")
@@ -145,7 +146,7 @@ namespace XmlDocumentation
 
             content = content.Replace("{$title}", title)
                              .Replace("{$syntax}", syntaxGroup)
-                             .Replace("{$signature}", signature + syntaxGroupClosure)
+                             .Replace("{$signature}", HttpUtility.HtmlEncode(signature) + syntaxGroupClosure)
                              .Replace("{$value}", value.ToHtml())
                              .Replace("{$params}", parameters.ToHtml())
                              .Replace("{$typeparams}", typeparams.ToHtml())
@@ -307,7 +308,7 @@ namespace XmlDocumentation
         }
 
         /// <summary>
-        /// Documentation XML parser/processor based on https://github.com/marek-stoj/ImmDoc.NET. 
+        /// Documentation XML parser/processor based on https://github.com/marek-stoj/ImmDoc.NET.
         /// </summary>
         class ImmDocNET
         {
@@ -349,6 +350,7 @@ namespace XmlDocumentation
 
                 return sb.ToString();
             }
+
             static string CreateCodeBlockTable(string language, string contents, bool inExampleSetion)
             {
                 return String.Format("<table class=\"{0}\"><col width=\"100%\" /><tr class=\"CodeTable\"><th class=\"CodeTable\">{1}</th></tr><tr class=\"CodeTable\"><td class=\"CodeTable\">{2}</td></tr></table>",
