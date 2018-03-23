@@ -313,7 +313,17 @@ namespace XmlDocumentation
         class ImmDocNET
         {
             static Regex codePattern = new Regex("<code>(?<Contents>(.|\r|\n)*?)</code>", RegexOptions.Multiline | RegexOptions.Compiled);
+
+            // static Regex seePattern = new Regex("((<see cref=\"(?<XmlMemberId>.*?)\"[ ]?/>)|" +
+            //                                     "(<see cref=\"(?<XmlMemberId>.*?)|" +
+            //                                     "(<seealso cref=\"(?<XmlMemberId>.*?)\"[ ]?/>)|" +
+            //                                     "(<seealso cref=\"(?<XmlMemberId>.*?))" +
+            //                                     "\">(?<Contents>.*?)" +
+            //                                     "((</see>)|(</seealso>))", RegexOptions.Multiline | RegexOptions.Compiled);
+
             static Regex seePattern = new Regex("(<see cref=\"(?<XmlMemberId>.*?)\"[ ]?/>)|(<see cref=\"(?<XmlMemberId>.*?)\">(?<Contents>.*?)</see>)", RegexOptions.Multiline | RegexOptions.Compiled);
+            static Regex seealsoPattern = new Regex("(<seealso cref=\"(?<XmlMemberId>.*?)\"[ ]?/>)|(<seealso cref=\"(?<XmlMemberId>.*?)\">(?<Contents>.*?)</seealso>)", RegexOptions.Multiline | RegexOptions.Compiled);
+
             static Regex paramrefPattern = new Regex("<paramref name=\"(?<ParamName>.*?)\" ?/>", RegexOptions.Multiline | RegexOptions.Compiled);
             static Regex typeparamrefPattern = new Regex("<typeparamref name=\"(?<TypeParamName>.*?)\" ?/>", RegexOptions.Multiline | RegexOptions.Compiled);
 
@@ -321,6 +331,7 @@ namespace XmlDocumentation
             static MatchEvaluator paramrefRegexEvaluator = new MatchEvaluator(OnParamrefPatternMatch);
             static MatchEvaluator typeparamrefRegexEvaluator = new MatchEvaluator(OnTypeparamrefPatternMatch);
             static MatchEvaluator seeRegexEvaluator = new MatchEvaluator(OnSeePatternMatch);
+            static MatchEvaluator seealsoRegexEvaluator = new MatchEvaluator(OnSeePatternMatch);
 
             private static string OnCodePatternMatch(Match match)
             {
@@ -461,6 +472,7 @@ namespace XmlDocumentation
 
                 contents = codePattern.Replace(contents, codeRegexEvaluator);
                 contents = seePattern.Replace(contents, seeRegexEvaluator);
+                contents = seealsoPattern.Replace(contents, seealsoRegexEvaluator);
                 contents = paramrefPattern.Replace(contents, paramrefRegexEvaluator);
                 contents = typeparamrefPattern.Replace(contents, typeparamrefRegexEvaluator);
 
