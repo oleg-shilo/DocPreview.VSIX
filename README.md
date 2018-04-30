@@ -10,13 +10,13 @@ There are many products that assist with producing the API Documentation from XM
 
 However most of these products fall short assisting with the actual development of the documentation: editing XML code comments as opposite to the building the final documentation. This is because majority of the tools are concentrating on actual authoring of the final documentation and styling it according one or another _Help format_.
 
-DocPreview is different. It provides an instantaneous preview of a given single XML comments block. DocPreview assists with validating the user input for being compatible with the documentation authoring tools (e.g. Sandcastle). Thus DocPreview is concentrating purely on efficient editing the documentation comments.
+DocPreview is different. It provides an instantaneous preview of a given single XML comments block for C#, C/C++ and VB.NET syntax. DocPreview assists with validating the user input for being compatible with the documentation authoring tools (e.g. Sandcastle). Thus DocPreview is concentrating purely on efficient editing the documentation comments.
 
 DocPreview deliberately doesn't strongly adhere to any of the API Documentation formats (e.g. HTML Help 1/2, MS Help Viewer, Open XML). Instead it concerns only on the validity of the documentation source (XML) and renders the preview in the custom format loosely based on one of the standard HTML Help formats.
 
 DocPreview is reusing some ported/adjusted bits from ImmDoc.NET (https://immdocnet.codeplex.com/). It is rather an excellent HTML documentation building tool, which is a light weight and lightning fast alternative to Sandcastle. Special thanks to Marek Stoj who is the author of ImmDoc.NET.  
 
-##Using DocPreview
+## Using DocPreview
 
 Using DocPreview is straight forward. Open the preview window from Menu->View->Other Windows. Now if you place the cursor inside of the XML code comments the documentation preview will be rendered when you press the refresh icon/button. Alternatively you can tick the 'Auto refresh' checkbox  and the preview will be generated automatically.
 

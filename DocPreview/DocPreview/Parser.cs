@@ -33,7 +33,7 @@ namespace DocPreview
             return true;
         }
 
-        public static IEnumerable<Result> FindAllDocumentation(string code, bool genericParsing = false)
+        public static IEnumerable<Result> FindAllDocumentation(string code, string language = "CSharp")
         {
             var result = new List<Result>();
 
@@ -41,9 +41,11 @@ namespace DocPreview
 
             int docStart = -1;
 
+            string xmlDocPreffix = GetXmlDocPrefix(language);
+
             for (int line = 0; line < lines.Length; line++)
             {
-                bool isDoc = lines[line].TrimStart().StartsWith("///");
+                bool isDoc = lines[line].TrimStart().StartsWith(xmlDocPreffix);
 
                 if (isDoc)
                 {
@@ -54,7 +56,7 @@ namespace DocPreview
                 {
                     if (docStart != -1)
                     {
-                        var info = FindMemberDocumentation(code, line, genericParsing);
+                        var info = FindMemberDocumentation(code, line, "C/C++");
                         if (info.Success)
                             result.Add(info);
                     }
@@ -65,45 +67,53 @@ namespace DocPreview
             return result;
         }
 
-        public static Result FindMemberDocumentation(string code, int caretLine, bool genericParsing = false)
+        static string GetXmlDocPrefix(string langage)
+        {
+            return langage == "Basic" ? "'''" : "///";
+        }
+
+        public static Result FindMemberDocumentation(string code, int caretLine, string language = "CSharp")
         {
             /*
             C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Xamarin\Xamarin\4.0.0.1689
-            
+
             Quite shockingly Xamarin VS plugin is using ICSharpCode.NRefactory.dll - AssemblyFileVersion("5.5.1")
             While this plugin relies on NuGet assembly ICSharpCode.NRefactory.dll - AssemblyFileVersion("5.2.0").
-            And the both assemblies are built as "Assembly ICSharpCode.NRefactory, Version 5.0.0.0" 
+            And the both assemblies are built as "Assembly ICSharpCode.NRefactory, Version 5.0.0.0"
             SHOCKING!!!!
             The assemblies are clearly different (file size and functionality wise) despite being both marked as the same version.
-            
+
             CLR cannot distinguish them and assembly probing gets so screwed that UnitTesting loads
-            one assembly file and VS (runtime) another one. 
-            
+            one assembly file and VS (runtime) another one.
+
             Xamarin should never ever distribute a conflicting assembly.
-            
-            The outcome is - using NRefactory v5.0.0.0 is too risky as it's not clear when and where the asm probing 
-            will fail again. And also there is no warranty that Xamarin wouldn't release yet another edition of 
+
+            The outcome is - using NRefactory v5.0.0.0 is too risky as it's not clear when and where the asm probing
+            will fail again. And also there is no warranty that Xamarin wouldn't release yet another edition of
             ICSharpCode.NRefactory v5.0.0.0.
 
             Forcing (somehow) DocPreview to be loaded before Xamarin will fix the problem but it will
-            then screw Xamarin plugin. 
-            
-            I had no choice but to implement my own "poor-man" parser.  
+            then screw Xamarin plugin.
+
+            I had no choice but to implement my own "poor-man" parser.
 
             */
             //FindMemberDocumentationNRefactoryNew(code, caretLine);
 
             char[] statementDelimiters = new char[] { ';', '{' };
 
-            string xmlDoxPreffix = "///";
+            string xmlDocPreffix = GetXmlDocPrefix(language);
+
             var result = new Result();
 
             int fromLine = caretLine - 1;
 
-            //poor man C# syntax parser. Too bad NRefactory conflicts with Xamarin 
+            //poor man C# syntax parser. Too bad NRefactory conflicts with Xamarin
             string[] lines = code.Lines().ToArray();
+            if (lines.Any() && lines.Last() == null)
+                lines = lines.Take(lines.Count() - 1).ToArray();
 
-            if (lines.Length > fromLine && lines[fromLine].Trim().StartsWith(xmlDoxPreffix)) // it is XML doc comment line
+            if (lines.Length > fromLine && lines[fromLine].Trim().StartsWith(xmlDocPreffix)) // it is XML doc comment line
             {
                 result.MemberTitle = "Member";
                 result.MemberDefinition = "[some member]";
@@ -115,8 +125,8 @@ namespace DocPreview
                     var line = lines[i].Trim();
                     if (line.HasText())
                     {
-                        if (line.StartsWith(xmlDoxPreffix))
-                            content.PrependLine(line.Substring(xmlDoxPreffix.Length));
+                        if (line.StartsWith(xmlDocPreffix))
+                            content.PrependLine(line.Substring(xmlDocPreffix.Length));
                         else
                             break;
                     }
@@ -128,8 +138,8 @@ namespace DocPreview
                     var line = lines[i].Trim();
                     if (line.HasText())
                     {
-                        if (line.StartsWith(xmlDoxPreffix))
-                            content.AppendLine(line.Substring(xmlDoxPreffix.Length));
+                        if (line.StartsWith(xmlDocPreffix))
+                            content.AppendLine(line.Substring(xmlDocPreffix.Length));
                         else
                         {
                             endOfDoc = i;
@@ -140,7 +150,7 @@ namespace DocPreview
 
                 if (endOfDoc != -1)
                 {
-                    char endofDeclChar = (char) 0;
+                    char endofDeclChar = (char)0;
 
                     var declaration = new StringBuilder();
                     for (int i = endOfDoc; i < lines.Length; i++)
@@ -166,7 +176,7 @@ namespace DocPreview
                     {
                         result.MemberDefinition = declaration.ToString().FormatApiSignature();
 
-                        if (!genericParsing)
+                        if (language == "CSharp")
                         {
                             result.MemberTitle = (result.MemberDefinition + " " + endofDeclChar).ToMemberTitle();
                         }
@@ -190,7 +200,6 @@ namespace DocPreview
                                     result.MemberTitle = "Property";
                             }
                         }
-
                     }
                 }
 
@@ -225,7 +234,7 @@ namespace DocPreview
                     parent = parent.Parent;
                 }
 
-                //parent is the declaration with the comments included shocking runtime difference 
+                //parent is the declaration with the comments included shocking runtime difference
                 //comparing to the unit test environment
                 return null;
                 ///////////////////////////////////
@@ -415,7 +424,6 @@ namespace DocPreview
             if (string.IsNullOrEmpty(input))
                 return input;
 
-
             var buffer = new StringBuilder();
 
             //example: public List<T> GetLogFile<T,V>
@@ -433,6 +441,7 @@ namespace DocPreview
         }
 
         static char[] wordDelimiters = "\r\t\n ".ToCharArray();
+
         public static string[] Words(this string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -546,32 +555,32 @@ namespace DocPreview
         {
             if (node is MethodDeclaration)
             {
-                var info = (MethodDeclaration) node;
+                var info = (MethodDeclaration)node;
                 return $"Method {info.Name}:{info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
             }
             else if (node is TypeDeclaration)
             {
-                var info = (TypeDeclaration) node;
+                var info = (TypeDeclaration)node;
                 return $"{info.ClassType} {info.Name}:{info.ClassType.ToString().ToLower()} {info.Name}";
             }
             else if (node is DelegateDeclaration)
             {
-                var info = (DelegateDeclaration) node;
+                var info = (DelegateDeclaration)node;
                 return $"Delegate {info.Name}:delegate {info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
             }
             else if (node is ConstructorDeclaration)
             {
-                var info = (ConstructorDeclaration) node;
+                var info = (ConstructorDeclaration)node;
                 return $"Constructor {info.Name}:{info.Name}({info.Parameters.ToDisplayString()})";
             }
             else if (node is PropertyDeclaration)
             {
-                var info = (PropertyDeclaration) node;
+                var info = (PropertyDeclaration)node;
                 return $"Property {info.Name}:{info.ReturnType} {info.Name};";
             }
             else if (node is FieldDeclaration)
             {
-                var info = (FieldDeclaration) node;
+                var info = (FieldDeclaration)node;
 
                 var name = info.Name;
                 if (!name.HasText())
@@ -589,6 +598,7 @@ namespace DocPreview
             }
             return null;
         }
+
         public static string GetFieldName(this string code, int startLine, int endLine)
         {
             var lines = code.Lines().Skip(startLine).Take(endLine - startLine + 1).ToArray();
@@ -601,6 +611,7 @@ namespace DocPreview
             else
                 return declaration.Substring(pos).Trim();
         }
+
         public static bool HasText(this string text)
         {
             return !string.IsNullOrEmpty(text);
@@ -651,5 +662,4 @@ namespace DocPreview
             return result;
         }
     }
-
 }

@@ -146,7 +146,7 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
 
                 string language = textView.TextBuffer.ContentType.TypeName;
 
-                if (textView != null && (language == "CSharp" || language == "C/C++"))
+                if (textView != null && (language == "CSharp" || language == "C/C++" || language == "Basic"))
                 {
                     ITextSnapshot snapshot = textView.TextSnapshot;
 
@@ -167,21 +167,21 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
                         lastPreviewLineNumber = caretLineNumber;
                         lastPreviewAllText = code;
 
-                        Parser.Result result = Parser.FindMemberDocumentation(code, caretLineNumber + 1, genericParsing: language != "CSharp");
+                        Parser.Result result = Parser.FindMemberDocumentation(code, caretLineNumber + 1, language);
                         var html = XmlDocumentation.DocPreview
                                                    .GenerateHtml(result.MemberTitle,
                                                                  result.MemberDefinition,
                                                                  result.XmlDocumentation);
                         if (language == "C/C++")
-                        {
                             html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>C++</th>");
-                        }
+                        else if (language == "Basic")
+                            html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>VB.NET</th>");
 
                         ShowPreview(html);
                     }
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
                 //just ignore the errors
                 ShowPreview(null);
@@ -210,7 +210,7 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
                     string fileName = dte.ActiveDocument.FullName;
                     string code = snapshot.GetText();
 
-                    var result = Parser.FindAllDocumentation(code, genericParsing: language != "CSharp").ToArray();
+                    var result = Parser.FindAllDocumentation(code, language).ToArray();
 
                     var content = result.Select(r => XmlDocumentation.DocPreview
                                                          .GenerateRawHtml(r.MemberTitle,
@@ -246,7 +246,6 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
             var key = Path.GetFullPath(sourceFile).ToLower().GetHashCode();
             var rootDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DocPreview", "Temp");
             var dir = Path.Combine(rootDir, "vs." + System.Diagnostics.Process.GetCurrentProcess().Id);
-
 
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
@@ -354,7 +353,14 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
 
     static class Json
     {
-        public static string ToJson(this object obj) { return new JavaScriptSerializer().Serialize(obj); }
-        public static T FromJson<T>(this string json) { return new JavaScriptSerializer().Deserialize<T>(json); }
+        public static string ToJson(this object obj)
+        {
+            return new JavaScriptSerializer().Serialize(obj);
+        }
+
+        public static T FromJson<T>(this string json)
+        {
+            return new JavaScriptSerializer().Deserialize<T>(json);
+        }
     }
 }
