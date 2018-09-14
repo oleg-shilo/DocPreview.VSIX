@@ -178,4 +178,15 @@ namespace DocPreview.Test
     class SpawnIdAttribute : Attribute
     {
     }
+    class t1
+    {
+        /// <summary>
+        /// ttt
+        /// </summary>
+        ///  <exception cref="T:System.ArgumentNullException">The <paramref name="innerException"/> argument
+        /// is null.</exception>
+        void test()
+        {
+        }
+    }
 }

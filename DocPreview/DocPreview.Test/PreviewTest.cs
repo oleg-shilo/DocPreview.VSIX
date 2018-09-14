@@ -29,6 +29,23 @@ namespace DocPreview.Test
         }
 
         [Fact]
+        public void ParseExceptionInfo()
+        {
+            int line = 184;
+
+            var result = Parser.FindMemberDocumentation(code, line);
+
+            Assert.True(result.Success);
+
+            var html = XmlDocumentation.DocPreview
+                                       .GenerateHtml(result.MemberTitle,
+                                                     result.MemberDefinition,
+                                                     result.XmlDocumentation);
+
+            Assert.NotEmpty(html);
+        }
+
+        [Fact]
         public void PreviewFile()
         {
             var result = Parser.FindAllDocumentation(code).ToArray();

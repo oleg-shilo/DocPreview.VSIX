@@ -213,7 +213,7 @@ namespace XmlDocumentation
 
                     html.AppendLine("<tr>")
                         .AppendLine($"<td><span class='PseudoLink'>{excType}</span></td>")
-                        .AppendLine($"<td>{item.Value}</td>")
+                        .AppendLine($"<td>{item.ToHtml()}</td>")
                         .AppendLine("</tr>");
                 }
                 html.AppendLine("</table");
