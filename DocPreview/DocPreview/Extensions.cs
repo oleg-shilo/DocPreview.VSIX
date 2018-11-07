@@ -26,6 +26,18 @@ namespace DocPreview
             return Global.GetViewHost()?.TextView;
         }
 
+        public static int IndexOfAny(this string text, string[] patterns)
+        {
+            var match = patterns.Select(x=>new { pos = text.IndexOf(x) })
+                                .Where(x=>x.pos != -1)
+                                .OrderBy(x=>x.pos)
+                                .FirstOrDefault();
+            if (match != null)
+                return match.pos;
+            else
+                return -1;
+        }
+
         public static IVsUserData GetUserData()
         {
             int mustHaveFocus = 1;//means true

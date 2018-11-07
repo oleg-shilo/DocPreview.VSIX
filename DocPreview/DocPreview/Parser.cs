@@ -100,7 +100,7 @@ namespace DocPreview
             */
             //FindMemberDocumentationNRefactoryNew(code, caretLine);
 
-            char[] statementDelimiters = new char[] { ';', '{' };
+            string[] statementDelimiters = new string[] { ";", "{" };
 
             string xmlDocPreffix = GetXmlDocPrefix(language);
 
@@ -162,7 +162,11 @@ namespace DocPreview
                             var temp = line.Trim();
 
                             if (!temp.EndsWith("[") && !temp.EndsWith("]")) //not an attribute declaration
+                            {
                                 declaration.AppendLine(line);
+                                if (language != "CSharp")
+                                    break;
+                            }
                         }
                         else
                         {
