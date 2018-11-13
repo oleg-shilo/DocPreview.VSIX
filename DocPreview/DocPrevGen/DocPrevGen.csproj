@@ -89,6 +89,7 @@
     <EmbeddedResource Include="Resource1.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +97,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="html\ContentsMerged.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="html\Contents-dark.css" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

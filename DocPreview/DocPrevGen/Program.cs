@@ -22,6 +22,10 @@ namespace XmlDocumentation
 {
     static class Program
     {
+        /// <summary>
+        /// Defines the entry point of the application.
+        /// </summary>
+        /// <param name="args">The arguments.</param>
         static void Main(string[] args)
         {
             string signature = File.ReadAllText(@"..\..\signature.txt");
@@ -58,12 +62,23 @@ namespace XmlDocumentation
                 IsVersionFirstRun = true;
 
                 Directory.CreateDirectory(htmlResourcesDir);
-                File.WriteAllText(Path.Combine(htmlResourcesDir, "Contents.css"), Resource1.Contents);
+                SetContentTheme(false);
                 File.WriteAllText(Path.Combine(htmlResourcesDir, "ContentsMerged.css"), Resource1.ContentsMerged);
                 Resource1.BigSquareExpanded.Save(Path.Combine(htmlResourcesDir, "BigSquareExpanded.gif"));
                 Resource1.SmallSquareExpanded.Save(Path.Combine(htmlResourcesDir, "SmalSquareExpanded.gif"));
             }
             return htmlResourcesDir;
+        }
+
+        public static void SetContentTheme(bool dark)
+        {
+            if (Directory.Exists(htmlResourcesDir))
+            {
+                if (dark)
+                    File.WriteAllText(Path.Combine(htmlResourcesDir, "Contents.css"), Resource1.Contents_dark);
+                else
+                    File.WriteAllText(Path.Combine(htmlResourcesDir, "Contents.css"), Resource1.Contents);
+            }
         }
 
         public static string htmlResourcesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

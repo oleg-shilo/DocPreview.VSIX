@@ -19,7 +19,7 @@ namespace DocPrevGen {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resource1 {
@@ -88,6 +88,27 @@ namespace DocPrevGen {
         internal static string Contents {
             get {
                 return ResourceManager.GetString("Contents", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*
+        /// * Copyright 2007 - 2009 Marek St�j
+        /// * 
+        /// * This file is part of ImmDoc .NET.
+        /// *
+        /// * ImmDoc .NET is free software; you can redistribute it and/or modify
+        /// * it under the terms of the GNU General Public License as published by
+        /// * the Free Software Foundation; either version 2 of the License, or
+        /// * (at your option) any later version.
+        /// *
+        /// * ImmDoc .NET is distributed in the hope that it will be useful,
+        /// * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        /// * MERCHANTABILITY or FITNESS F [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Contents_dark {
+            get {
+                return ResourceManager.GetString("Contents_dark", resourceCulture);
             }
         }
         

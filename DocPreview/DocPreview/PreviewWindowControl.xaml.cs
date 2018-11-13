@@ -36,6 +36,11 @@ namespace DocPreview
 
             AutoRefresh.IsChecked = config.AutoRefresh;
 
+            if (config.DefaultTheme)
+                DefaultTheme_Click(null, null);
+            else
+                DarkTheme_Click(null, null);
+
             Browser.Navigating += Browser_Navigating;
             Browser.LoadCompleted += Browser_LoadCompleted;
             Loaded += MainWindow_Loaded;
@@ -331,11 +336,41 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
         {
             config.AutoRefresh = AutoRefresh.IsChecked ?? false;
         }
+
+        private void DefaultTheme_Click(object sender, RoutedEventArgs e)
+        {
+            XmlDocumentation.DocPreview.SetContentTheme(false);
+            RefreshPreview(true);
+            config.DefaultTheme = true;
+            RefreshThemeMenu();
+        }
+
+        private void DarkTheme_Click(object sender, RoutedEventArgs e)
+        {
+            XmlDocumentation.DocPreview.SetContentTheme(true);
+            RefreshPreview(true);
+            config.DefaultTheme = false;
+            RefreshThemeMenu();
+        }
+
+        void RefreshThemeMenu()
+        {
+            foreach (MenuItem item in root.ContextMenu.Items)
+            {
+                item.IsChecked = false;
+
+                if (config.DefaultTheme)
+                    item.IsChecked = item.Tag.Equals("default");
+                else
+                    item.IsChecked = !item.Tag.Equals("default");
+            }
+        }
     }
 
     class Config
     {
         public bool AutoRefresh;
+        public bool DefaultTheme = true;
 
         public static Config Load()
         {
