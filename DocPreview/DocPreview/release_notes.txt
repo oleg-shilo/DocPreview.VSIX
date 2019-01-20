@@ -1,0 +1,4 @@
+* - Issue #6: Add support for `<see langword="...`
+* -Issue #8: Complete Documentation option not working.
+
+

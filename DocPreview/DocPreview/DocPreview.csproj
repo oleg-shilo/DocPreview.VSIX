@@ -109,6 +109,10 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="Resources\about.html" />
+    <Content Include="release_notes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\Package.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
