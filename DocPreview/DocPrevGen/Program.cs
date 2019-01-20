@@ -335,6 +335,7 @@ namespace XmlDocumentation
         /// </summary>
         class ImmDocNET
         {
+            // Excellent XMD doc reference: http://web.archive.org/web/20080623060531/http://thoughtpad.net/alan-dean/cs-xml-documentation.html
             static Regex codePattern = new Regex("<code>(?<Contents>(.|\r|\n)*?)</code>", RegexOptions.Multiline | RegexOptions.Compiled);
 
             // static Regex seePattern = new Regex("((<see cref=\"(?<XmlMemberId>.*?)\"[ ]?/>)|" +
@@ -345,6 +346,7 @@ namespace XmlDocumentation
             //                                     "((</see>)|(</seealso>))", RegexOptions.Multiline | RegexOptions.Compiled);
 
             static Regex seePattern = new Regex("(<see cref=\"(?<XmlMemberId>.*?)\"[ ]?/>)|(<see cref=\"(?<XmlMemberId>.*?)\">(?<Contents>.*?)</see>)", RegexOptions.Multiline | RegexOptions.Compiled);
+            static Regex seePattern2 = new Regex("(<see langword=\"(?<XmlMemberId>.*?)\"[ ]?/>)|(<see langword=\"(?<XmlMemberId>.*?)\">(?<Contents>.*?)</see>)", RegexOptions.Multiline | RegexOptions.Compiled);
             static Regex seealsoPattern = new Regex("(<seealso cref=\"(?<XmlMemberId>.*?)\"[ ]?/>)|(<seealso cref=\"(?<XmlMemberId>.*?)\">(?<Contents>.*?)</seealso>)", RegexOptions.Multiline | RegexOptions.Compiled);
 
             static Regex paramrefPattern = new Regex("<paramref name=\"(?<ParamName>.*?)\" ?/>", RegexOptions.Multiline | RegexOptions.Compiled);
@@ -354,6 +356,7 @@ namespace XmlDocumentation
             static MatchEvaluator paramrefRegexEvaluator = new MatchEvaluator(OnParamrefPatternMatch);
             static MatchEvaluator typeparamrefRegexEvaluator = new MatchEvaluator(OnTypeparamrefPatternMatch);
             static MatchEvaluator seeRegexEvaluator = new MatchEvaluator(OnSeePatternMatch);
+            static MatchEvaluator seeRegexEvaluator2 = new MatchEvaluator(OnSeePatternMatch2);
             static MatchEvaluator seealsoRegexEvaluator = new MatchEvaluator(OnSeePatternMatch);
 
             private static string OnCodePatternMatch(Match match)
@@ -430,6 +433,24 @@ namespace XmlDocumentation
                 return "<a href=\"\" >" + name + "</a>";
             }
 
+            static string OnSeePatternMatch2(Match match)
+            {
+                //<see cref="T:csscript.CSharpParser.DirectiveDelimiters"/>
+                //<see cref="DirectiveDelimiters"/>
+                string contents = match.Groups["Contents"].Value;
+                if (string.IsNullOrEmpty(contents))
+                    contents = match.Groups["XmlMemberId"].Value;
+
+                string name = contents.Split('=')
+                                      .Last()
+                                      .Replace("\"", "")
+                                      .Replace("/>", "")
+                                      .Split('.')
+                                      .Last();
+
+                return "<strong>" + name + "</strong>";
+            }
+
             static XslCompiledTransform listsXslt;
             static XmlReaderSettings xslReaderSettings;
             static XmlReaderSettings listsXmlReaderSettings;
@@ -495,6 +516,7 @@ namespace XmlDocumentation
 
                 contents = codePattern.Replace(contents, codeRegexEvaluator);
                 contents = seePattern.Replace(contents, seeRegexEvaluator);
+                contents = seePattern2.Replace(contents, seeRegexEvaluator2);
                 contents = seealsoPattern.Replace(contents, seealsoRegexEvaluator);
                 contents = paramrefPattern.Replace(contents, paramrefRegexEvaluator);
                 contents = typeparamrefPattern.Replace(contents, typeparamrefRegexEvaluator);
