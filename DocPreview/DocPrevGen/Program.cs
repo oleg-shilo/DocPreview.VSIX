@@ -1,5 +1,4 @@
-﻿using DocPrevGen;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,6 +10,7 @@ using System.Web;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Xsl;
+using DocPrevGen;
 
 //Special thanks to Marek Stój for his excellent ImmDoc.NET (https://github.com/marek-stoj/ImmDoc.NET)
 //DocPreview uses the following ImmDoc.NET components:
@@ -82,9 +82,9 @@ namespace XmlDocumentation
         }
 
         public static string htmlResourcesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                                                      "DocPreview",
-                                                       Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-                                                       "css");
+                                                             "DocPreview",
+                                                             Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+                                                             "css");
 
         public static string AppDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DocPreview");
 
@@ -140,40 +140,48 @@ namespace XmlDocumentation
 
         public static string GenerateHtml(string title, string signature, string xml, string template)
         {
-            string content = template;
+            try
+            {
+                string content = template;
 
-            //replace '{' with '<' in "<see cref="StringEnum{T}"/>"
-            xml = xml.Convert(@"<see cref="".*\{\{*.*\}""/>", m => m.Value.Replace("{", "&lt;").Replace("}", "&gt;"));
+                //replace '{' with '<' in "<see cref="StringEnum{T}"/>"
+                xml = xml.Convert(@"<see cref="".*\{\{*.*\}""/>", m => m.Value.Replace("{", "&lt;").Replace("}", "&gt;"));
 
-            var doc = XDocument.Parse($"<member>{xml}</member>").Root; //input element doesn't have a single root
+                var doc = XDocument.Parse($"<member>{xml}</member>").Root; //input element doesn't have a single root
 
-            FixLists(doc);
+                FixLists(doc);
 
-            var summary = doc.Descendants("summary").First();
-            var parameters = doc.Descendants("param");
-            var typeparams = doc.Descendants("typeparam");
-            var returns = doc.Descendants("returns").FirstOrDefault();
-            var examples = doc.Descendants("example");
-            var value = doc.Descendants("value").FirstOrDefault();
-            var remarks = doc.Descendants("remarks");
-            var exceptions = doc.Descendants("exception");
-            var permissions = doc.Descendants("permission");
+                var summary = doc.Descendants("summary").First();
+                var parameters = doc.Descendants("param");
+                var typeparams = doc.Descendants("typeparam");
+                var returns = doc.Descendants("returns").FirstOrDefault();
+                var examples = doc.Descendants("example");
+                var value = doc.Descendants("value").FirstOrDefault();
+                var remarks = doc.Descendants("remarks");
+                var exceptions = doc.Descendants("exception");
+                var permissions = doc.Descendants("permission");
 
-            content = content.Replace("{$title}", title)
-                             .Replace("{$syntax}", syntaxGroup)
-                             .Replace("{$signature}", HttpUtility.HtmlEncode(signature) + syntaxGroupClosure)
-                             .Replace("{$value}", value.ToHtml())
-                             .Replace("{$params}", parameters.ToHtml())
-                             .Replace("{$typeparams}", typeparams.ToHtml())
-                             .Replace("{$return}", returns.ToHtml())
-                             .Replace("{$exception}", exceptions.ToHtml())
-                             .Replace("{$permission}", permissions.ToHtml())
-                             .Replace("{$remarks}", remarks.ToHtml())
-                             .Replace("{$example}", examples.ToHtml())
-                             .Replace("{$summary}", summary.ToHtml())
-                             .Replace("{$css_folder}", htmlResourcesDir);
+                content = content.Replace("{$title}", title)
+                                 .Replace("{$syntax}", syntaxGroup)
+                                 .Replace("{$signature}", HttpUtility.HtmlEncode(signature) + syntaxGroupClosure)
+                                 .Replace("{$value}", value.ToHtml())
+                                 .Replace("{$params}", parameters.ToHtml())
+                                 .Replace("{$typeparams}", typeparams.ToHtml())
+                                 .Replace("{$return}", returns.ToHtml())
+                                 .Replace("{$exception}", exceptions.ToHtml())
+                                 .Replace("{$permission}", permissions.ToHtml())
+                                 .Replace("{$remarks}", remarks.ToHtml())
+                                 .Replace("{$example}", examples.ToHtml())
+                                 .Replace("{$summary}", summary.ToHtml())
+                                 .Replace("{$css_folder}", htmlResourcesDir);
 
-            return content;
+                return content;
+            }
+            catch
+            {
+                throw new ApplicationException($"Error parsing \"{title}: '{signature}'\". Ensure XML for this member " +
+                    $"compiles with the XML specification.");
+            }
         }
 
         static void FixLists(XElement element)

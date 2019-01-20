@@ -1,24 +1,26 @@
-﻿//------------------------------------------------------------------------------
+﻿using System;
+using System.Linq;
+using System.Windows.Navigation;
+using Microsoft.VisualStudio.Shell;
+
+//------------------------------------------------------------------------------
 // <copyright file="PreviewWindowControl.xaml.cs" company="Company">
 //     Copyright (c) Company.  All rights reserved.
 // </copyright>
 //------------------------------------------------------------------------------
 
 using EnvDTE80;
-using System;
-using System.Linq;
-using System.Windows.Navigation;
 
 namespace DocPreview
 {
-    using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Text.Editor;
     using System.Diagnostics;
     using System.IO;
     using System.Reflection;
     using System.Web.Script.Serialization;
     using System.Windows;
     using System.Windows.Controls;
+    using Microsoft.VisualStudio.Text;
+    using Microsoft.VisualStudio.Text.Editor;
 
     /// <summary>
     /// Interaction logic for PreviewWindowControl.
@@ -113,6 +115,12 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
 
         Lazy<string> errorContent = new Lazy<string>(() => XmlDocumentation.DocPreview.GenerateErrorHtml(""));
 
+        string DecorateError(string error)
+        {
+            return $@"<span style='font-style: italic;'><br>
+<span style='color: red;'> {error} </span></span><br>";
+        }
+
         void Navigate(string url)
         {
             nextNavCanceled = false;
@@ -189,7 +197,8 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
             catch (System.Exception e)
             {
                 //just ignore the errors
-                ShowPreview(null);
+                var html = XmlDocumentation.DocPreview.GenerateErrorHtml(DecorateError(e.Message));
+                ShowPreview(html);
             }
         }
 
@@ -218,9 +227,9 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
                     var result = Parser.FindAllDocumentation(code, language).ToArray();
 
                     var content = result.Select(r => XmlDocumentation.DocPreview
-                                                         .GenerateRawHtml(r.MemberTitle,
-                                                                          r.MemberDefinition,
-                                                                          r.XmlDocumentation)).ToArray();
+                                                                     .GenerateRawHtml(r.MemberTitle,
+                                                                                      r.MemberDefinition,
+                                                                                      r.XmlDocumentation)).ToArray();
 
                     if (content.Any())
                     {
@@ -237,8 +246,9 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
+                PreviewWindowCommand.Instance.ShowMessageBox(e.Message, "DocPreview");
             }
 
             return null;
@@ -263,14 +273,14 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
                     var runningProcs = Process.GetProcesses().Select(x => x.Id);
 
                     var oldDirs = Directory.GetDirectories(rootDir, "vs.*")
-                                       .Select(x => new
-                                       {
-                                           ProcId = int.Parse(Path.GetFileName(x).Replace("vs.", "")),
-                                           Dir = x
-                                       })
-                                       //.Where(x => Process.GetProcessById(x.ProcId) == null) //throws exception if proc is not running
-                                       .Where(x => !runningProcs.Contains(x.ProcId))
-                                       .Select(x => x.Dir);
+                                           .Select(x => new
+                                           {
+                                               ProcId = int.Parse(Path.GetFileName(x).Replace("vs.", "")),
+                                               Dir = x
+                                           })
+                                           //.Where(x => Process.GetProcessById(x.ProcId) == null) //throws exception if proc is not running
+                                           .Where(x => !runningProcs.Contains(x.ProcId))
+                                           .Select(x => x.Dir);
 
                     foreach (var d in oldDirs)
                         try

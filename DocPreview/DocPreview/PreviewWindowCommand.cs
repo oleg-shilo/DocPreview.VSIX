@@ -98,5 +98,15 @@ namespace DocPreview
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
         }
+
+        public void ShowMessageBox(string message, string title)
+        {
+            VsShellUtilities.ShowMessageBox(this.ServiceProvider,
+                                            message,
+                                            title,
+                                            OLEMSGICON.OLEMSGICON_INFO,
+                                            OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+        }
     }
 }
