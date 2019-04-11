@@ -1,28 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-    <Metadata>
-        <Identity Id="7671c1a9-8269-44eb-9b9a-bd8bec0af629" Version="1.3.4.0" Language="en-US" Publisher="Oleg Shilo" />
-        <DisplayName>DocPreview</DisplayName>
-        <Description xml:space="preserve">XML Documentation Preview. Generates HTML preview of the code XML documentation from the comment region under the current caret position. The preview window can be accessed from Menu-&gt;View-&gt;Other Windows.
+  <Metadata>
+    <Identity Id="7671c1a9-8269-44eb-9b9a-bd8bec0af629" Version="1.3.5.0" Language="en-US" Publisher="Oleg Shilo" />
+    <DisplayName>DocPreview</DisplayName>
+    <Description xml:space="preserve">XML Documentation Preview. Generates HTML preview of the code XML documentation from the comment region under the current caret position. The preview window can be accessed from Menu-&gt;View-&gt;Other Windows.
 </Description>
-        <License>licence.txt</License>
-        <GettingStartedGuide>https://github.com/oleg-shilo/DocPreview.VSIX</GettingStartedGuide>
-        <ReleaseNotes>release_notes.txt</ReleaseNotes>
-        <Icon>Resources\Package.ico</Icon>
-        <PreviewImage>Resources\preview.png</PreviewImage>
-        <Tags>C#,C/C++, VB.NET, XML Documentation, Visual Studio </Tags>
-    </Metadata>
-    <Installation>
-        <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[15.0]" />
-    </Installation>
-    <Dependencies>
-        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
-        <Dependency Id="Microsoft.VisualStudio.MPF.14.0" DisplayName="Visual Studio MPF 14.0" d:Source="Installed" Version="[14.0]" />
-    </Dependencies>
-    <Assets>
-        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-    </Assets>
-    <Prerequisites>
-        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0.26208.0,16.0)" DisplayName="Visual Studio core editor" />
-    </Prerequisites>
+    <License>licence.txt</License>
+    <GettingStartedGuide>https://github.com/oleg-shilo/DocPreview.VSIX</GettingStartedGuide>
+    <ReleaseNotes>release_notes.txt</ReleaseNotes>
+    <Icon>Resources\Package.ico</Icon>
+    <PreviewImage>Resources\preview.png</PreviewImage>
+    <Tags>C#,C/C++, VB.NET, XML Documentation, Visual Studio </Tags>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[15.0,17.0)" />
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+  </Assets>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
 </PackageManifest>
