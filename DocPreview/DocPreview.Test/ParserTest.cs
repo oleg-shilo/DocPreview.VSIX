@@ -51,7 +51,7 @@ namespace DocPreview.Test
         [Fact]
         public void ParseAutoProp()
         {
-            int line = 82;
+            int line = 80;
 
             var result = Parser.FindMemberDocumentation(code, line);
 
@@ -87,7 +87,7 @@ namespace DocPreview.Test
         [Fact]
         public void ParseDelegate()
         {
-            int line = 67;
+            int line = 65;
 
             var result = Parser.FindMemberDocumentation(code, line);
 
@@ -123,12 +123,12 @@ namespace DocPreview.Test
         [Fact]
         public void ParseGenericClass()
         {
-            int line = 113;
+            int line = 110;
 
             var result = Parser.FindMemberDocumentation(code, line);
 
             Assert.Equal("Class AnotherClass", result.MemberTitle);
-            Assert.Equal("class AnotherClass<T>  where T: new()", result.MemberDefinition);
+            Assert.Equal("class AnotherClass<T> where T : new()", result.MemberDefinition);
             var ttt = result.XmlDocumentation.Deflate();
             Assert.Equal("<summary> AnotherClass doc </summary> <typeparam name=\"T\">The type of the T.</typeparam>", result.XmlDocumentation.Deflate());
         }
@@ -148,19 +148,19 @@ namespace DocPreview.Test
         [Fact]
         public void ParseMethod()
         {
-            int line = 72;
+            int line = 70;
 
             var result = Parser.FindMemberDocumentation(code, line);
 
             Assert.Equal("Method GetLogFile", result.MemberTitle);
-            Assert.Equal("List<T> GetLogFile<T,V>(List<Dictionary<T,V>> options)  where T: class", result.MemberDefinition);
+            Assert.Equal("List<T> GetLogFile<T, V>(List<Dictionary<T, V>> options) where T : class", result.MemberDefinition);
             Assert.Equal("<summary> Gets the log file. </summary> <param name=\"options\">The options.</param>", result.XmlDocumentation.Deflate());
         }
 
         [Fact]
         public void ParseInterfaceSummary()
         {
-            int line = 120;
+            int line = 118;
 
             var result = Parser.FindMemberDocumentation(code, line);
 
@@ -172,7 +172,7 @@ namespace DocPreview.Test
         [Fact]
         public void ParseInterfaceProperty()
         {
-            int line = 126;
+            int line = 124;
 
             var result = Parser.FindMemberDocumentation(code, line);
 
@@ -184,7 +184,7 @@ namespace DocPreview.Test
         [Fact]
         public void ParseInterfaceEvent()
         {
-            int line = 131;
+            int line = 129;
 
             var result = Parser.FindMemberDocumentation(code, line);
 
@@ -196,7 +196,7 @@ namespace DocPreview.Test
         [Fact]
         public void ParseInterfaceMethod()
         {
-            int line = 139;
+            int line = 137;
 
             var result = Parser.FindMemberDocumentation(code, line);
 
@@ -208,7 +208,7 @@ namespace DocPreview.Test
         [Fact]
         public void ParseGenericMethod()
         {
-            int line = 169;
+            int line = 136;
 
             var result = Parser.FindMemberDocumentation(code, line);
 
@@ -234,7 +234,7 @@ namespace DocPreview.Test
         {
             var result = Parser.FindAllDocumentation(code);
 
-            Assert.Equal(18, result.Count());
+            Assert.Equal(22, result.Count());
         }
     }
 }
