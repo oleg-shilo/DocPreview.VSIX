@@ -220,12 +220,12 @@ namespace DocPreview
             var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
 
             var comment = syntaxTree.Children
-                                 .DeepAll(x => x is Comment)
-                                 .Cast<Comment>()
-                                 .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
-                                 .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
-                                 .OrderBy(x => x.Size)
-                                 .FirstOrDefault();
+                                    .DeepAll(x => x is Comment)
+                                    .Cast<Comment>()
+                                    .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
+                                    .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
+                                    .OrderBy(x => x.Size)
+                                    .FirstOrDefault();
 
             if (comment != null)
             {
@@ -281,12 +281,12 @@ namespace DocPreview
             var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
 
             var comment = syntaxTree.Children
-                                 .DeepAll(x => x is Comment)
-                                 .Cast<Comment>()
-                                 .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
-                                 .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
-                                 .OrderBy(x => x.Size)
-                                 .FirstOrDefault();
+                                    .DeepAll(x => x is Comment)
+                                    .Cast<Comment>()
+                                    .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
+                                    .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
+                                    .OrderBy(x => x.Size)
+                                    .FirstOrDefault();
 
             if (comment != null)
             {

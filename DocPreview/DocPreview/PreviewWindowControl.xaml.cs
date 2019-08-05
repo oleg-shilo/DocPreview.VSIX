@@ -159,7 +159,7 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
 
                 string language = textView.TextBuffer.ContentType.TypeName;
 
-                if (textView != null && (language == "CSharp" || language == "C/C++" || language == "Basic"))
+                if (textView != null && (language == "CSharp" || language == "F#" || language == "C/C++" || language == "Basic"))
                 {
                     ITextSnapshot snapshot = textView.TextSnapshot;
 
@@ -189,6 +189,8 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
                             html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>C++</th>");
                         else if (language == "Basic")
                             html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>VB.NET</th>");
+                        else if (language == "F#")
+                            html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>F#</th>");
 
                         ShowPreview(html);
                     }
@@ -210,7 +212,7 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
 
                 string language = textView.TextBuffer.ContentType.TypeName;
 
-                if (textView != null && (language == "CSharp" || language == "C/C++"))
+                if (textView != null && (language == "CSharp" || language == "F#" || language == "FSharp" || language == "C/C++"))
                 {
                     ITextSnapshot snapshot = textView.TextSnapshot;
 
@@ -236,9 +238,11 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
                         var html = XmlDocumentation.DocPreview.HtmlDecorateMembers(content);
 
                         if (language == "C/C++")
-                        {
                             html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>C++</th>");
-                        }
+                        else if (language == "Basic")
+                            html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>VB.NET</th>");
+                        else if (language == "F#")
+                            html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>F#</th>");
 
                         var file = GetHtmlFileNameFor(fileName);
                         File.WriteAllText(file, html);
