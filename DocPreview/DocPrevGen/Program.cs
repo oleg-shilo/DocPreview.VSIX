@@ -138,6 +138,16 @@ namespace XmlDocumentation
             return html.Replace("{$css_folder}", htmlResourcesDir);
         }
 
+        /// <summary>
+        /// Generates the HTML.
+        /// </summary>
+        /// <param name="title">The title.</param>
+        /// <param name="signature">The signature.</param>
+        /// <param name="xml">The XML.</param>
+        /// <param name="template">The template.</param>
+        /// <returns></returns>
+        /// <exception cref="ApplicationException">Error parsing \"{title}: '{signature}'\". Ensure XML for this member " +
+        ///                     $"compiles with the XML specification.</exception>
         public static string GenerateHtml(string title, string signature, string xml, string template)
         {
             try

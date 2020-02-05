@@ -161,6 +161,9 @@ namespace DocPreview
                         {
                             var temp = line.Trim();
 
+                            if (temp.StartsWith("/// <summary>")) // start of the next member                            }
+                                break;
+
                             if (!temp.EndsWith("[") && !temp.EndsWith("]")) //not an attribute declaration
                             {
                                 declaration.AppendLine(line);
@@ -539,7 +542,7 @@ namespace DocPreview
 
         public static string FormatApiSignature(this string text)
         {
-            return text.Trim();
+            return text.Trim().Trim(',');
         }
 
         public static string Deflate(this string text)

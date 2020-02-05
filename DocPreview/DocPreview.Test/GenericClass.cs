@@ -178,6 +178,7 @@ namespace DocPreview.Test
     class SpawnIdAttribute : Attribute
     {
     }
+
     class t1
     {
         /// <summary>
@@ -188,5 +189,26 @@ namespace DocPreview.Test
         void test()
         {
         }
+    }
+
+    /// <summary>
+    /// Test Enum
+    /// </summary>
+    enum TestEnum
+    {
+        /// <summary>
+        /// value #1
+        /// </summary>
+        value1,
+
+        /// <summary>
+        /// value #2
+        /// </summary>
+        value2,
+
+        /// <summary>
+        /// value #3
+        /// </summary>
+        value3,
     }
 }

@@ -1,15 +1,32 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Xunit;
-using xdoc=XmlDocumentation;
+using xdoc = XmlDocumentation;
 
 namespace DocPreview.Test
 {
     public class PreviewTest
     {
         static string code = File.ReadAllText("GenericClass.cs");
+
+        [Fact]
+        public void PreviewEnum()
+        {
+            int line = 200 - 1;
+
+            var result = Parser.FindMemberDocumentation(code, line);
+
+            Assert.True(result.Success);
+
+            var html = XmlDocumentation.DocPreview
+                                       .GenerateHtml(result.MemberTitle,
+                                                     result.MemberDefinition,
+                                                     result.XmlDocumentation);
+
+            Assert.NotEmpty(html);
+        }
 
         [Fact]
         public void PreviewMethod()
@@ -21,8 +38,8 @@ namespace DocPreview.Test
             Assert.True(result.Success);
 
             var html = XmlDocumentation.DocPreview
-                                       .GenerateHtml(result.MemberTitle, 
-                                                     result.MemberDefinition, 
+                                       .GenerateHtml(result.MemberTitle,
+                                                     result.MemberDefinition,
                                                      result.XmlDocumentation);
 
             Assert.NotEmpty(html);
