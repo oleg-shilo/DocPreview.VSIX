@@ -24,4 +24,4 @@ _DocPreview supports all [recommended documentation tags](https://msdn.microsoft
 
 The below is the screenshot that illustrates the use of DocPreview:
 
-![](https://www.codeplex.com/Download?ProjectName=docpreview&DownloadId=1535782)
+![](https://github.com/oleg-shilo/DocPreview.VSIX/raw/master/DocPreview/DocPreview/Resources/preview.large.png)
