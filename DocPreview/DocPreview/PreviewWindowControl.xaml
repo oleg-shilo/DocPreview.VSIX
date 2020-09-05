@@ -33,7 +33,7 @@
             <MenuItem
                 Click="ShowCustomTheme_Click"
                 Tag="custom_show"
-                Header="Edit Custorm Theme" />
+                Header="Edit Custom Theme" />
         </ContextMenu>
     </UserControl.Resources>
 

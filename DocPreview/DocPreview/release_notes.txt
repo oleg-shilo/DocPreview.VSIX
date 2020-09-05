@@ -1,1 +1,1 @@
-- Issue #14: Incorrect syntax section generated for enum value
+- Issue #16: User CSS support (support for custom CSS of the web preview)
