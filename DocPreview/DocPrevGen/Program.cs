@@ -56,6 +56,7 @@ namespace XmlDocumentation
                 //<user>\AppData\Roaming\DocPreview
                 if (!Directory.Exists(Path.GetDirectoryName(Path.GetDirectoryName(htmlResourcesDir))))
                 {
+
                     IsFirstEverRun = true;
                 }
 
@@ -66,6 +67,13 @@ namespace XmlDocumentation
                 File.WriteAllText(Path.Combine(htmlResourcesDir, "ContentsMerged.css"), Resource1.ContentsMerged);
                 Resource1.BigSquareExpanded.Save(Path.Combine(htmlResourcesDir, "BigSquareExpanded.gif"));
                 Resource1.SmallSquareExpanded.Save(Path.Combine(htmlResourcesDir, "SmalSquareExpanded.gif"));
+
+            }
+
+            if (!File.Exists(CustomCss))
+            {
+                Directory.CreateDirectory(htmlCustomResourcesDir);
+                File.WriteAllText(CustomCss, Resource1.Contents);
             }
             return htmlResourcesDir;
         }
@@ -80,11 +88,25 @@ namespace XmlDocumentation
                     File.WriteAllText(Path.Combine(htmlResourcesDir, "Contents.css"), Resource1.Contents);
             }
         }
+        public static void SetContentCustomTheme(string cssFile)
+        {
+            if (File.Exists(cssFile))
+            {
+                var content = File.ReadAllText(cssFile);
+                File.WriteAllText(Path.Combine(htmlResourcesDir, "Contents.css"), content);
+            }
+        }
 
         public static string htmlResourcesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                                              "DocPreview",
                                                              Assembly.GetExecutingAssembly().GetName().Version.ToString(),
                                                              "css");
+
+
+        public static string htmlCustomResourcesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                                                                                             "DocPreview", "Custom", "css");
+
+        public static string CustomCss = Path.Combine(XmlDocumentation.DocPreview.htmlCustomResourcesDir, "custom_theme.css");
 
         public static string AppDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DocPreview");
 

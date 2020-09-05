@@ -38,10 +38,12 @@ namespace DocPreview
 
             AutoRefresh.IsChecked = config.AutoRefresh;
 
-            if (config.DefaultTheme)
+            if (config.Theme == Theme.Default)
                 DefaultTheme_Click(null, null);
-            else
+            else if (config.Theme == Theme.Dark)
                 DarkTheme_Click(null, null);
+            else
+                CustomTheme_Click(null, null);
 
             Browser.Navigating += Browser_Navigating;
             Browser.LoadCompleted += Browser_LoadCompleted;
@@ -152,6 +154,11 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
         {
             try
             {
+                if(config.Theme == Theme.Custom)
+                    XmlDocumentation.DocPreview.SetContentCustomTheme(config.CustomCss);
+                else
+                    XmlDocumentation.DocPreview.SetContentTheme(dark: config.Theme == Theme.Dark);
+
                 if (force)
                     protectDisplayedProductInfo = false;
 
@@ -353,38 +360,57 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
 
         private void DefaultTheme_Click(object sender, RoutedEventArgs e)
         {
-            XmlDocumentation.DocPreview.SetContentTheme(false);
+            config.Theme = Theme.Default;
             RefreshPreview(true);
-            config.DefaultTheme = true;
             RefreshThemeMenu();
         }
 
         private void DarkTheme_Click(object sender, RoutedEventArgs e)
         {
-            XmlDocumentation.DocPreview.SetContentTheme(true);
+            config.Theme = Theme.Dark;
             RefreshPreview(true);
-            config.DefaultTheme = false;
             RefreshThemeMenu();
+        }
+
+        void CustomTheme_Click(object sender, RoutedEventArgs e)
+        {
+            config.Theme = Theme.Custom;
+            RefreshPreview(true);
+            RefreshThemeMenu();
+        }
+        void ShowCustomTheme_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start("explorer.exe", $"/select, \"{config.CustomCss}\"");
+            }
+            catch { }
         }
 
         void RefreshThemeMenu()
         {
-            foreach (MenuItem item in root.ContextMenu.Items)
-            {
-                item.IsChecked = false;
+            var checkBoxItems = root.ContextMenu.Items.OfType<MenuItem>().Where(x => x.Tag != null);
 
-                if (config.DefaultTheme)
-                    item.IsChecked = item.Tag.Equals("default");
-                else
-                    item.IsChecked = !item.Tag.Equals("default");
+            foreach (MenuItem item in checkBoxItems)
+            {
+                item.IsChecked = item.Tag.Equals(config.Theme.ToString().ToLower());
             }
         }
+
+    }
+
+    public enum Theme
+    {
+        Default,
+        Dark,
+        Custom
     }
 
     class Config
     {
         public bool AutoRefresh;
-        public bool DefaultTheme = true;
+        public Theme Theme;
+        public string CustomCss = XmlDocumentation.DocPreview.CustomCss;
 
         public static Config Load()
         {

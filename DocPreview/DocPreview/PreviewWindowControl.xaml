@@ -24,6 +24,16 @@
                 Click="DarkTheme_Click"
                 Tag="dark"
                 Header="Dark Theme" />
+            <MenuItem
+                x:Name="CustomTheme"
+                Click="CustomTheme_Click"
+                Tag="custom"
+                Header="Custom Theme" />
+            <Separator></Separator>
+            <MenuItem
+                Click="ShowCustomTheme_Click"
+                Tag="custom_show"
+                Header="Edit Custorm Theme" />
         </ContextMenu>
     </UserControl.Resources>
 
