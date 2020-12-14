@@ -33,7 +33,7 @@
             <MenuItem
                 Click="ShowCustomTheme_Click"
                 Tag="custom_show"
-                Header="Edit Custorm Theme" />
+                Header="Edit Custom Theme" />
         </ContextMenu>
     </UserControl.Resources>
 
@@ -47,16 +47,40 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch" />
 
-        <CheckBox
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="right"
+                    VerticalAlignment="Top">
+            <ComboBox x:Name="ZoomLevel"  SelectionChanged="ComboBox_SelectionChanged"
+                      ToolTip="Default zoom level"
+                      Text="100%">
+                <ComboBoxItem>200%</ComboBoxItem>
+                <ComboBoxItem>190%</ComboBoxItem>
+                <ComboBoxItem>180%</ComboBoxItem>
+                <ComboBoxItem>170%</ComboBoxItem>
+                <ComboBoxItem>160%</ComboBoxItem>
+                <ComboBoxItem>150%</ComboBoxItem>
+                <ComboBoxItem>140%</ComboBoxItem>
+                <ComboBoxItem>130%</ComboBoxItem>
+                <ComboBoxItem>120%</ComboBoxItem>
+                <ComboBoxItem>110%</ComboBoxItem>
+                <ComboBoxItem>100%</ComboBoxItem>
+                <ComboBoxItem>90%</ComboBoxItem>
+                <ComboBoxItem>80%</ComboBoxItem>
+                <ComboBoxItem>70%</ComboBoxItem>
+                <ComboBoxItem>60%</ComboBoxItem>
+                <ComboBoxItem>50%</ComboBoxItem>
+            </ComboBox>
+            <Button Visibility="Collapsed" Click="ZoomIn_Click" Background="{x:Null}" BorderBrush="{x:Null}">+</Button>
+            <Button Visibility="Collapsed" >-</Button>
+            <CheckBox
             x:Name="AutoRefresh"
             Margin="5,3"
-            HorizontalAlignment="right"
-            VerticalAlignment="Top"
             Checked="AutoRefresh_Checked"
             Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
             ToolTip="Trigger refreshes by cursor position changes.">
-            Auto refresh
-        </CheckBox>
+                Auto refresh
+            </CheckBox>
+        </StackPanel>
 
         <Grid
             x:Name="Refresh"

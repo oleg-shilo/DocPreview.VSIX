@@ -4,6 +4,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" type="text/css" href="{$css_folder}/Contents.css" />
     <title>{$title}</title>
+    <script type="text/javascript">
+        function getzoom() {
+            var zoom = screen.deviceXDPI / screen.logicalXDPI;
+            return zoom;
+        }
+    </script>
 </head>
 <body>
     <div id="Header">
@@ -11,18 +17,17 @@
         <div id="PageTitle">{$title}</div>
         <div id="Contents" />
 
-{$summary}
-{$syntax}
-{$signature}
-{$typeparams}
-{$params}
-{$return}
-{$value}
-{$permission}
-{$exception}
-{$remarks}
-{$example}
-
+        {$summary}
+        {$syntax}
+        {$signature}
+        {$typeparams}
+        {$params}
+        {$return}
+        {$value}
+        {$permission}
+        {$exception}
+        {$remarks}
+        {$example}
     </div>
 </body>
 </html>

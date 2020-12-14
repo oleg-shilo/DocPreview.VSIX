@@ -1,1 +1,1 @@
-- Issue #14: Incorrect syntax section generated for enum value
+- Added support for persisting zoom level

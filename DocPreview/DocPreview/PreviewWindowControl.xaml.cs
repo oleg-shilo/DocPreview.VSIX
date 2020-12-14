@@ -16,6 +16,7 @@ namespace DocPreview
     using System.Diagnostics;
     using System.IO;
     using System.Reflection;
+    using System.Threading;
     using System.Web.Script.Serialization;
     using System.Windows;
     using System.Windows.Controls;
@@ -37,6 +38,19 @@ namespace DocPreview
             this.InitializeComponent();
 
             AutoRefresh.IsChecked = config.AutoRefresh;
+            // ZoomLevel.Text = (config.DefaultZoom == 0 ? 100 : config.DefaultZoom) + "%";
+
+            if (config.DefaultZoom == 0)
+                config.DefaultZoom = 100;
+
+            for (int i = 50; i <= 200; i += 10)
+            {
+                object itm;
+                ZoomLevel.Items.Add(itm = new ComboBoxItem { Content = $"{i}%" });
+
+                if (i == config.DefaultZoom)
+                    ZoomLevel.SelectedItem = itm;
+            }
 
             if (config.Theme == Theme.Default)
                 DefaultTheme_Click(null, null);
@@ -46,29 +60,35 @@ namespace DocPreview
                 CustomTheme_Click(null, null);
 
             Browser.Navigating += Browser_Navigating;
+            // Browser.Navigated += (s, e) => SetZoomLevel();
+
             Browser.LoadCompleted += Browser_LoadCompleted;
             Loaded += MainWindow_Loaded;
             Dispatcher.ShutdownStarted += (s, e) => config.Save();
             PreviewWindowPackage.OnLineChanged = AutoRefreshPreview;
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             nextNavCanceled = false;
             if (XmlDocumentation.DocPreview.IsVersionFirstRun && !XmlDocumentation.DocPreview.IsFirstEverRun)
                 ShowReleaseNotes();
             else
+            {
+                SetZoomLevel();
                 Browser.NavigateToString(initialPrompt.Value);
+            }
         }
 
-        private void Browser_LoadCompleted(object sender, NavigationEventArgs e)
+        void Browser_LoadCompleted(object sender, NavigationEventArgs e)
         {
             nextNavCanceled = true;
+            SetZoomLevel();
         }
 
         bool nextNavCanceled = false;
 
-        private void Browser_Navigating(object sender, NavigatingCancelEventArgs e)
+        void Browser_Navigating(object sender, NavigatingCancelEventArgs e)
         {
             e.Cancel = nextNavCanceled;
 
@@ -111,9 +131,7 @@ namespace DocPreview
         bool showingCannotNavigateContent = false;
         bool protectDisplayedProductInfo = false;
 
-        Lazy<string> initialPrompt = new Lazy<string>(() => XmlDocumentation.DocPreview.GenerateErrorHtml(@"<span style='font-style: italic;'><br>
-<span style='color: red;'> Place cursor/caret at the C# XML
-documentation comment region and click 'Refresh' icon. </span></span><br>"));
+        Lazy<string> initialPrompt = new Lazy<string>(XmlDocumentation.DocPreview.GenerateDefaultHtml);
 
         Lazy<string> errorContent = new Lazy<string>(() => XmlDocumentation.DocPreview.GenerateErrorHtml(""));
 
@@ -154,7 +172,7 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
         {
             try
             {
-                if(config.Theme == Theme.Custom)
+                if (config.Theme == Theme.Custom)
                     XmlDocumentation.DocPreview.SetContentCustomTheme(config.CustomCss);
                 else
                     XmlDocumentation.DocPreview.SetContentTheme(dark: config.Theme == Theme.Dark);
@@ -187,17 +205,25 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
                         lastPreviewLineNumber = caretLineNumber;
                         lastPreviewAllText = code;
 
+                        var html = "";
+
                         Parser.Result result = Parser.FindMemberDocumentation(code, caretLineNumber + 1, language);
-                        var html = XmlDocumentation.DocPreview
-                                                   .GenerateHtml(result.MemberTitle,
-                                                                 result.MemberDefinition,
-                                                                 result.XmlDocumentation);
-                        if (language == "C/C++")
-                            html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>C++</th>");
-                        else if (language == "Basic")
-                            html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>VB.NET</th>");
-                        else if (language == "F#")
-                            html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>F#</th>");
+
+                        if (result.Success)
+                        {
+                            html = XmlDocumentation.DocPreview
+                                                       .GenerateHtml(result.MemberTitle,
+                                                                     result.MemberDefinition,
+                                                                     result.XmlDocumentation);
+                            if (language == "C/C++")
+                                html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>C++</th>");
+                            else if (language == "Basic")
+                                html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>VB.NET</th>");
+                            else if (language == "F#")
+                                html = html.Replace("<th class='CodeTable'>C#</th>", "<th class='CodeTable'>F#</th>");
+                        }
+                        else
+                            html = XmlDocumentation.DocPreview.GenerateDefaultHtml();
 
                         ShowPreview(html);
                     }
@@ -308,17 +334,17 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
             return Path.Combine(dir, "doc." + key + ".html");
         }
 
-        private void Refresh_Click(object sender, RoutedEventArgs e)
+        void Refresh_Click(object sender, RoutedEventArgs e)
         {
             RefreshPreview(true);
         }
 
-        private void Grid_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        void Grid_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             RefreshPreview(true);
         }
 
-        private void About_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        void About_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             ShowAbout();
         }
@@ -340,7 +366,7 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
             protectDisplayedProductInfo = true;
         }
 
-        private void OpenForAll_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        void OpenForAll_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             string htmlFile = GeneratePreviewForAll();
             if (htmlFile != null)
@@ -353,19 +379,19 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
             }
         }
 
-        private void AutoRefresh_Checked(object sender, RoutedEventArgs e)
+        void AutoRefresh_Checked(object sender, RoutedEventArgs e)
         {
             config.AutoRefresh = AutoRefresh.IsChecked ?? false;
         }
 
-        private void DefaultTheme_Click(object sender, RoutedEventArgs e)
+        void DefaultTheme_Click(object sender, RoutedEventArgs e)
         {
             config.Theme = Theme.Default;
             RefreshPreview(true);
             RefreshThemeMenu();
         }
 
-        private void DarkTheme_Click(object sender, RoutedEventArgs e)
+        void DarkTheme_Click(object sender, RoutedEventArgs e)
         {
             config.Theme = Theme.Dark;
             RefreshPreview(true);
@@ -378,6 +404,7 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
             RefreshPreview(true);
             RefreshThemeMenu();
         }
+
         void ShowCustomTheme_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -397,6 +424,38 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
             }
         }
 
+        void Button_Click(object sender, RoutedEventArgs e)
+        {
+        }
+
+        void ZoomIn_Click(object sender, RoutedEventArgs e)
+        {
+            // works but does not match _axIWebBrowser2 zoom
+            var zoom = this.Browser.InvokeScript("getzoom");
+        }
+
+        void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+           => Dispatcher.BeginInvoke((Action)SetZoomLevel); // important to let COM object to do it asynchronously.
+
+        void SetZoomLevel()
+        {
+            try
+            {
+                var zoomLevel = int.Parse(ZoomLevel.Text.Replace("%", ""));
+
+                var wb = (dynamic)this.Browser.GetType()
+                                              .GetField("_axIWebBrowser2",
+                                                        BindingFlags.Instance | BindingFlags.NonPublic)
+                                              .GetValue(this.Browser);
+
+                wb.ExecWB(63, 2, zoomLevel, ref zoomLevel);   // OLECMDID_OPTICAL_ZOOM (63) - don't prompt (2)
+                config.DefaultZoom = zoomLevel;
+            }
+            catch
+            {
+                // the control may not be ready yet
+            }
+        }
     }
 
     public enum Theme
@@ -409,6 +468,7 @@ documentation comment region and click 'Refresh' icon. </span></span><br>"));
     class Config
     {
         public bool AutoRefresh;
+        public int DefaultZoom;
         public Theme Theme;
         public string CustomCss = XmlDocumentation.DocPreview.CustomCss;
 

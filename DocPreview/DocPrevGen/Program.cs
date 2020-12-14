@@ -56,7 +56,6 @@ namespace XmlDocumentation
                 //<user>\AppData\Roaming\DocPreview
                 if (!Directory.Exists(Path.GetDirectoryName(Path.GetDirectoryName(htmlResourcesDir))))
                 {
-
                     IsFirstEverRun = true;
                 }
 
@@ -67,7 +66,6 @@ namespace XmlDocumentation
                 File.WriteAllText(Path.Combine(htmlResourcesDir, "ContentsMerged.css"), Resource1.ContentsMerged);
                 Resource1.BigSquareExpanded.Save(Path.Combine(htmlResourcesDir, "BigSquareExpanded.gif"));
                 Resource1.SmallSquareExpanded.Save(Path.Combine(htmlResourcesDir, "SmalSquareExpanded.gif"));
-
             }
 
             if (!File.Exists(CustomCss))
@@ -88,6 +86,7 @@ namespace XmlDocumentation
                     File.WriteAllText(Path.Combine(htmlResourcesDir, "Contents.css"), Resource1.Contents);
             }
         }
+
         public static void SetContentCustomTheme(string cssFile)
         {
             if (File.Exists(cssFile))
@@ -102,13 +101,18 @@ namespace XmlDocumentation
                                                              Assembly.GetExecutingAssembly().GetName().Version.ToString(),
                                                              "css");
 
-
         public static string htmlCustomResourcesDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                                                                              "DocPreview", "Custom", "css");
 
         public static string CustomCss = Path.Combine(XmlDocumentation.DocPreview.htmlCustomResourcesDir, "custom_theme.css");
 
         public static string AppDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DocPreview");
+
+        public static string GenerateDefaultHtml()
+            => GenerateErrorHtml(@"<span style='font-style: italic;'><br> <span style='color: red;'>
+                                       Place cursor/caret at the C# XML documentation comment region and click
+                                       'Refresh' icon.
+                                   </span></span><br>");
 
         public static string GenerateErrorHtml(string errorText = "")
         {
