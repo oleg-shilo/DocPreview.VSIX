@@ -1,28 +1,22 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Windows;
+using System;
 using System.Linq;
-using System.Windows.Navigation;
-using Microsoft.VisualStudio.Shell;
-
-//------------------------------------------------------------------------------
-// <copyright file="PreviewWindowControl.xaml.cs" company="Company">
-//     Copyright (c) Company.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
+using System.Windows.Controls;
 
 using EnvDTE80;
 
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Threading;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
+using System.Text.Json;
+using System.Windows.Navigation;
+
 namespace DocPreview
 {
-    using System.Diagnostics;
-    using System.IO;
-    using System.Reflection;
-    using System.Threading;
-    using System.Web.Script.Serialization;
-    using System.Windows;
-    using System.Windows.Controls;
-    using Microsoft.VisualStudio.Text;
-    using Microsoft.VisualStudio.Text.Editor;
-
     /// <summary>
     /// Interaction logic for PreviewWindowControl.
     /// </summary>
@@ -36,9 +30,7 @@ namespace DocPreview
         public PreviewWindowControl()
         {
             this.InitializeComponent();
-
             AutoRefresh.IsChecked = config.AutoRefresh;
-            // ZoomLevel.Text = (config.DefaultZoom == 0 ? 100 : config.DefaultZoom) + "%";
 
             if (config.DefaultZoom == 0)
                 config.DefaultZoom = 100;
@@ -65,7 +57,21 @@ namespace DocPreview
             Browser.LoadCompleted += Browser_LoadCompleted;
             Loaded += MainWindow_Loaded;
             Dispatcher.ShutdownStarted += (s, e) => config.Save();
-            PreviewWindowPackage.OnLineChanged = AutoRefreshPreview;
+            DocPreviewPackage.OnLineChanged = AutoRefreshPreview;
+        }
+
+        /// <summary>
+        /// Handles click on the button by displaying a message box.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event args.</param>
+        [SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions", Justification = "Sample code")]
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:ElementMustBeginWithUpperCaseLetter", Justification = "Default event handler naming pattern")]
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(
+                string.Format(System.Globalization.CultureInfo.CurrentUICulture, "Invoked '{0}'", this.ToString()),
+                "PreviewWindow");
         }
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -490,12 +496,12 @@ namespace DocPreview
     {
         public static string ToJson(this object obj)
         {
-            return new JavaScriptSerializer().Serialize(obj);
+            return JsonSerializer.Serialize(obj);
         }
 
         public static T FromJson<T>(this string json)
         {
-            return new JavaScriptSerializer().Deserialize<T>(json);
+            return JsonSerializer.Deserialize<T>(json);
         }
     }
 }

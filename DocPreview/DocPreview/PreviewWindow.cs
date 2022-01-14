@@ -1,15 +1,9 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="PreviewWindow.cs" company="Company">
-//     Copyright (c) Company.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.Shell;
+using System;
+using System.Runtime.InteropServices;
 
 namespace DocPreview
 {
-    using System;
-    using System.Runtime.InteropServices;
-    using Microsoft.VisualStudio.Shell;
-
     /// <summary>
     /// This class implements the tool window exposed by this package and hosts a user control.
     /// </summary>
@@ -21,7 +15,7 @@ namespace DocPreview
     /// implementation of the IVsUIElementPane interface.
     /// </para>
     /// </remarks>
-    [Guid("25541c7f-a414-4f11-a620-44172b7ce714")]
+    [Guid("cae83480-7d78-4894-abd2-8c395ec0b0c7")]
     public class PreviewWindow : ToolWindowPane
     {
         /// <summary>
@@ -29,7 +23,7 @@ namespace DocPreview
         /// </summary>
         public PreviewWindow() : base(null)
         {
-            this.Caption = "XML Doc Preview";
+            this.Caption = "PreviewWindow";
 
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on

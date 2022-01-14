@@ -1,17 +1,14 @@
-﻿<UserControl
-    x:Class="DocPreview.PreviewWindowControl"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.14.0"
-    Name="MyToolWindow"
-    d:DesignHeight="300"
-    d:DesignWidth="300"
-    mc:Ignorable="d">
-    <!--<Grid Background="#FFD4DFFF">-->
-    <!--  http://stackoverflow.com/questions/7231186/how-can-i-find-out-when-visual-studio-theme-color-changes  -->
-
+﻿<UserControl x:Class="DocPreview.PreviewWindowControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+             Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
+             Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             Name="MyToolWindow">
     <UserControl.Resources>
         <ContextMenu x:Key="contextMenu" StaysOpen="true">
             <MenuItem
@@ -36,10 +33,8 @@
                 Header="Edit Custom Theme" />
         </ContextMenu>
     </UserControl.Resources>
-
-    <Grid
-        x:Name="root"
-        Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}"
+    <Grid        x:Name="root"
+        Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
         ContextMenu="{StaticResource contextMenu}">
         <WebBrowser
             x:Name="Browser"
@@ -76,7 +71,7 @@
             x:Name="AutoRefresh"
             Margin="5,3"
             Checked="AutoRefresh_Checked"
-            Foreground="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+            Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
             ToolTip="Trigger refreshes by cursor position changes.">
                 Auto refresh
             </CheckBox>
@@ -101,7 +96,7 @@
                 Height="12"
                 Margin="0,0,0,0"
                 Data="M7.5157686,16.529112C7.7549473,16.534241,8.0181313,16.71569,8.2613803,17.082534L21.938303,31.323391C22.077704,31.533193 22.161104,31.741392 22.191004,31.941192 22.378502,33.191898 20.582911,32.991997 19.394114,32.565695L14.124631,30.675589C13.743232,30.541488 13.334233,30.84429 13.426634,31.23489 14.796529,37.124214 18.829115,42.253134 24.774395,44.708244 30.245676,46.953053 36.151955,46.436049 41.03994,43.827438 41.584137,43.537638 41.900536,42.968037 42.082836,42.376932 42.765232,40.172325 44.815826,38.572718 47.24432,38.572718 50.228706,38.572718 52.647999,40.992027 52.647999,43.97644 52.647999,46.961452 50.228706,49.380762 47.24432,49.380762 46.604923,49.380762 45.95652,49.473162 45.405827,49.798765 38.47625,53.887281 29.874577,54.831385 21.952704,51.570868 14.110231,48.350756 8.6910687,41.736233 6.5908266,34.064301 6.4736367,33.630701 5.9671083,33.421196 5.6129499,33.693899L2.8903082,35.802607C1.8916223,36.57601 0.2666278,37.397715 0.024440833,36.15741 -0.01462126,35.960209 -0.0081210418,35.733007 0.05306632,35.484907L6.8056656,17.364436C6.9404231,16.807389,7.2082544,16.522517,7.5157686,16.529112z M32.378216,0.0010623932C35.609257,0.030261993 38.881496,0.66186428 42.044758,1.9622984 49.889851,5.1841774 55.313114,11.796762 57.408238,19.470462 57.526638,19.903457 58.031845,20.113754 58.387348,19.840257L61.108883,17.732384C62.107494,16.958795 63.73381,16.134605 63.976116,17.37479 64.015114,17.572687 64.007217,17.799384 63.946014,18.047381L58.130947,36.172047C57.886044,37.164333,57.229836,37.289932,56.670029,36.447542L42.06546,22.209427C41.925057,22.00113 41.841656,21.790732 41.810257,21.588835 41.620354,20.340251 43.418476,20.544648 44.607288,20.971243L49.874249,22.858519C50.253254,22.995117 50.66206,22.692521 50.570759,22.299826 49.204941,16.408002 45.168495,11.281868 39.223126,8.8227997 33.72176,6.5728388 27.780293,7.1073723 22.876434,9.753788 22.341429,10.041584 21.997725,10.573477 21.781422,11.14247 21.010613,13.186044 19.04059,14.640525 16.728064,14.640525 13.742428,14.640525 11.323,12.221356 11.323,9.2368946 11.323,6.2519131 13.742428,3.8320246 16.728064,3.8320246 16.907765,3.8320246 17.086166,3.8424644 17.260569,3.8600445 17.842577,3.9213238 18.435083,3.8165245 18.944189,3.5260582 23.021637,1.2025137 27.655926,-0.04160881 32.378216,0.0010623932z"
-                Fill="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                Fill="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
                 MouseLeftButtonDown="Grid_MouseLeftButtonDown"
                 RenderTransformOrigin="0.5,0.5"
                 Stretch="Uniform"
@@ -136,7 +131,7 @@
                 Height="12"
                 Margin="0,0,0,0"
                 Data="M45.963548,8.269645L62.665147,25.065546 45.963548,39.871244 45.963548,31.963644C45.963548,31.963644 17.120617,24.075571 9.909945,39.871244 9.9099454,35.922571 12.530199,16.167482 45.963548,16.167483z M0,0L41.778571,0 41.778571,4.1795139 41.778571,8.3590277 37.598714,8.3590277 37.598714,4.1795139 4.1798577,4.1795139 4.1798577,45.954649 37.598714,45.954649 37.598714,41.775137 41.778571,41.775137 41.778571,45.954649 41.778571,50.134165 37.598714,50.134165 0,50.134165 0,45.954649 0,4.1795139z"
-                Fill="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                Fill="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
                 MouseLeftButtonDown="Grid_MouseLeftButtonDown"
                 RenderTransformOrigin="0.5,0.5"
                 Stretch="Uniform"
@@ -151,7 +146,6 @@
                 </Path.RenderTransform>
             </Path>
         </Grid>
-
         <Grid
             x:Name="About"
             Margin="20,5"
@@ -172,7 +166,7 @@
                 Height="12"
                 Margin="0,0,0,0"
                 Data="M285.308,622.263L490.959,622.263 490.959,768 285.308,768z M383.461,0C501.526,5E-06 595.41,21.8896 665.113,65.5247 735.017,109.304 769.768,160.138 769.768,218.318 769.768,250.431 756.966,280.817 731.361,309.619 705.756,338.277 651.09,377.304 567.164,426.698 523.678,452.332 496.65,472.926 486.285,488.478 475.718,504.031 471.045,531.825 472.062,572.004L285.308,572.004C284.904,552.994 284.701,541.33 284.701,537.153 284.701,494.383 294.658,459.1 314.572,431.452 334.69,403.801 374.519,372.695 434.671,338.134 494.618,303.572 530.383,280.817 542.169,270.161 560.255,253.169 569.198,234.591 569.198,214.141 569.198,185.772 553.346,161.435 521.441,141.273 489.334,121.112 446.253,110.888 392.198,110.888 339.974,110.888 296.283,121.544 261.127,142.569 225.972,163.594 201.992,195.853 188.782,239.056L0,222.495C5.28372,160.57 42.4707,108.007 111.563,64.804 180.656,21.6013 271.084,5E-06 383.461,0z"
-                Fill="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowTextKey}}"
+                Fill="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
                 MouseLeftButtonDown="About_MouseLeftButtonDown"
                 RenderTransformOrigin="0.5,0.5"
                 Stretch="Uniform"

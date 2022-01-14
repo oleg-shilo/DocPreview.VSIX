@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Web.Script.Serialization;
 using ICSharpCode.NRefactory.CSharp;
 
 namespace DocPreview
@@ -472,15 +471,11 @@ namespace DocPreview
         //    if (string.IsNullOrEmpty(input))
         //        return new string[0];
 
-        //    int pos;
+        // int pos;
 
-        //    if (last)
-        //        pos = input.LastIndexOf(delimiter);
-        //    else
-        //        pos = input.IndexOf(delimiter);
+        // if (last) pos = input.LastIndexOf(delimiter); else pos = input.IndexOf(delimiter);
 
-        //    if (pos != -1)
-        //        return new string[] { input.Substring(0, pos), input.Substring(pos) };
+        // if (pos != -1) return new string[] { input.Substring(0, pos), input.Substring(pos) };
 
         //    return new string[] { input };
         //}
@@ -495,21 +490,14 @@ namespace DocPreview
         //    if (string.IsNullOrEmpty(input))
         //        return new string[0];
 
-        //    int pos;
+        // int pos;
 
-        //    if (last)
-        //        pos = input.LastIndexOf(delimiter);
-        //    else
-        //        pos = input.IndexOf(delimiter);
+        // if (last) pos = input.LastIndexOf(delimiter); else pos = input.IndexOf(delimiter);
 
-        //    if (pos != -1)
-        //    {
-        //        if (pos == 0)
-        //            return new string[] { input.Substring(pos + delimiter.Length) };
-        //        else if (pos == input.Length - delimiter.Length - 1)
-        //            return new string[] { input.Substring(pos) };
-        //        else
-        //            return new string[] { input.Substring(0, pos), input.Substring(pos + delimiter.Length) };
+        // if (pos != -1) { if (pos == 0) return new string[] { input.Substring(pos +
+        // delimiter.Length) }; else if (pos == input.Length - delimiter.Length - 1) return new
+        // string[] { input.Substring(pos) }; else return new string[] { input.Substring(0, pos),
+        // input.Substring(pos + delimiter.Length) };
 
         //    }
         //    return new string[] { input };
