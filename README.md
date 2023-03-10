@@ -18,6 +18,10 @@ DocPreview deliberately doesn't strongly adhere to any of the API Documentation 
 
 DocPreview is reusing some ported/adjusted bits from ImmDoc.NET (https://immdocnet.codeplex.com/). It is rather an excellent HTML documentation building tool, which is a light weight and lightning fast alternative to Sandcastle. Special thanks to Marek Stoj who is the author of ImmDoc.NET.  
 
+## Limitations
+
+Please note that some of the newer XML Doc tags that have been introduced after the release of this extension, will be ignored in the member documentation preview text. Let me know such cases and I will see what can be done. In many cases extending the tag support was relatively easy. Though in some others a significant investment is required (e.g. #17) thus I can use your help. But at least voute for the feture requests so I can make the decicion to invest in it or not.  
+
 ## Using DocPreview
 
 Using DocPreview is straight forward. Open the preview window from Menu->View->Other Windows. Now if you place the cursor inside of the XML code comments the documentation preview will be rendered when you press the refresh icon/button. Alternatively you can tick the 'Auto refresh' checkbox  and the preview will be generated automatically.
