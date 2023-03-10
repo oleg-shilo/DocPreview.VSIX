@@ -20,7 +20,11 @@ DocPreview is reusing some ported/adjusted bits from ImmDoc.NET (https://immdocn
 
 ## Limitations
 
-Please note that some of the newer XML Doc tags that have been introduced after the release of this extension, will be ignored in the member documentation preview text. Let me know such cases and I will see what can be done. In many cases extending the tag support was relatively easy. Though in some others a significant investment is required (e.g. #17) thus I can use your help. But at least voute for the feture requests so I can make the decicion to invest in it or not.  
+Please note that some of the newer XML Doc tags that have been introduced after the release of this extension, will be ignored in the member documentation preview text. Let me know such cases and I will see what can be done. In many cases extending the tag support was relatively easy. Though in some others a significant investment is required (e.g. [#17](https://github.com/oleg-shilo/DocPreview.VSIX/issues/17)) thus I can use your help. But at least voute for the feture requests so I can make the desicion to invest in it or not.  
+
+And you may also find that for some more advanced preview scenarios you may need to go with the higher grad of the licenced industrial tools. 
+
+DocPreview is designed to be light. 
 
 ## Using DocPreview
 
