@@ -20,11 +20,11 @@ DocPreview is reusing some ported/adjusted bits from ImmDoc.NET (https://immdocn
 
 ## Limitations
 
-Please note that some of the newer XML Doc tags that have been introduced after the release of this extension, will be ignored in the member documentation preview text. Let me know such cases and I will see what can be done. In many cases extending the tag support was relatively easy. Though in some others a significant investment is required (e.g. [#17](https://github.com/oleg-shilo/DocPreview.VSIX/issues/17)) thus I can use your help. But at least voute for the feture requests so I can make the desicion to invest in it or not.  
+DocPreview is designed to be light and it does not aim on building chm files or even to poroviding ultimatelly accurate preview rendering of the future documentation. Thus it is not a "compiler" but rather a "linter", which helps avoiding misformatted or even invalid XML documentation content with a very short feedback loop. 
 
-And you may also find that for some more advanced preview scenarios you may need to go with the higher grade of the licenced industrial tools. 
+And you may also find that for some more advanced preview scenarios you may need to go with the higher grade licenced industrial tools. 
 
-DocPreview is designed to be light and its objective is not to build the chm or even to porovide ultimatelly accurate preview rendering of the future documentation. Thus it is not a "compiler" but rather a "linter", which helps avoiding misformatted or even invalid XML documentation content. 
+Please note that some of the newer XML Doc tags that have been introduced after the release of this extension, will be ignored in the member documentation preview text. Let me know such cases and I will see what can be done. In many cases extending the tag support was relatively easy. Though in some others a significant investment is required (e.g. [#17](https://github.com/oleg-shilo/DocPreview.VSIX/issues/17)) thus I can use your help. But at least vote for the feture requests so I can make the desicion to invest in it or not.  
 
 ## Using DocPreview
 
