@@ -211,4 +211,28 @@ namespace DocPreview.Test
         /// </summary>
         value3,
     }
+
+    class TestAgain
+    {
+        /// <summary>
+        /// <b>Evaluate</b> the expression associated with the target property specified.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="JValue"/> containing the value of the expression evaluated. The following rules apply to the
+        /// return values:
+        /// <list type="bullet">
+        /// <item>
+        /// If the target property is found and the expression evaluates to a valid primitive value, then a JValue
+        /// is returned that includes the result of the expression.
+        /// </item>
+        /// <item>
+        /// If the target property is found and evaluates to <b>null</b> then a JValue containing null is returned.
+        /// </item>
+        /// <item>
+        /// If the target property is not found, then null is returned.
+        /// </item>
+        /// </list>
+        /// </returns>
+        int foo { }
+    }
 }

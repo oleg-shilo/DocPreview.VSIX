@@ -62,9 +62,9 @@
   <ItemGroup>
     <Compile Include="GenericTest.cs" />
     <Compile Include="ParserTest.cs" />
-    <Compile Include="GenericClass.cs">
+    <None Include="GenericClass.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </None>
     <Compile Include="PreviewTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

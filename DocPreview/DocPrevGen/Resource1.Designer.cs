@@ -8,10 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DocPrevGen {
+namespace DocPrevGen
+{
     using System;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,54 +23,64 @@ namespace DocPrevGen {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resource1 {
-        
+    internal partial class Resource1
+    {
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resource1() {
+        internal Resource1()
+        {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DocPrevGen.Resource1", typeof(Resource1).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
-            get {
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap BigSquareExpanded {
-            get {
+        internal static System.Drawing.Bitmap BigSquareExpanded
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("BigSquareExpanded", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to /*
         /// * Copyright 2007 - 2009 Marek St�j
@@ -85,12 +96,14 @@ namespace DocPrevGen {
         /// * but WITHOUT ANY WARRANTY; without even the implied warranty of
         /// * MERCHANTABILITY or FITNESS F [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string Contents {
-            get {
+        internal static string Contents
+        {
+            get
+            {
                 return ResourceManager.GetString("Contents", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to /*
         /// * Copyright 2007 - 2009 Marek St�j
@@ -106,12 +119,14 @@ namespace DocPrevGen {
         /// * but WITHOUT ANY WARRANTY; without even the implied warranty of
         /// * MERCHANTABILITY or FITNESS F [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string Contents_dark {
-            get {
+        internal static string Contents_dark
+        {
+            get
+            {
                 return ResourceManager.GetString("Contents_dark", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to /*
         /// * Copyright 2007 - 2009 Marek St�j
@@ -127,12 +142,14 @@ namespace DocPrevGen {
         /// * but WITHOUT ANY WARRANTY; without even the implied warranty of
         /// * MERCHANTABILITY or FITNESS F [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string ContentsMerged {
-            get {
+        internal static string ContentsMerged
+        {
+            get
+            {
                 return ResourceManager.GetString("ContentsMerged", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
         ///
@@ -150,22 +167,26 @@ namespace DocPrevGen {
         /// * ImmDoc .NET is distributed in the hope that it will be useful,
         /// * but WITHOUT ANY WARRANTY; without even the imp [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string Lists {
-            get {
+        internal static string Lists
+        {
+            get
+            {
                 return ResourceManager.GetString("Lists", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SmallSquareExpanded {
-            get {
+        internal static System.Drawing.Bitmap SmallSquareExpanded
+        {
+            get
+            {
                 object obj = ResourceManager.GetObject("SmallSquareExpanded", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;&gt;
         ///&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; xml:lang=&quot;en&quot; lang=&quot;en&quot;&gt;
@@ -179,12 +200,14 @@ namespace DocPrevGen {
         ///        &lt;div id=&quot;ProjectTitle&quot;&gt;Documentation Preview&lt;/div&gt;
         ///        &lt;div id=&quot;PageTitle&quot;&gt;{$title}&lt;/d [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string template_light {
-            get {
+        internal static string template_light
+        {
+            get
+            {
                 return ResourceManager.GetString("template_light", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to     &lt;div id=&quot;Header&quot;&gt;
         ///        &lt;div id=&quot;ProjectTitle&quot;&gt;Documentation Preview&lt;/div&gt;
@@ -205,8 +228,10 @@ namespace DocPrevGen {
         ///    &lt;/div&gt;
         ///.
         /// </summary>
-        internal static string template_raw {
-            get {
+        internal static string template_raw
+        {
+            get
+            {
                 return ResourceManager.GetString("template_raw", resourceCulture);
             }
         }

@@ -1,18 +1,16 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Windows;
-using System;
-using System.Linq;
-using System.Windows.Controls;
-
-using EnvDTE80;
-
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Threading;
+﻿using EnvDTE80;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text.Json;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Navigation;
 
 namespace DocPreview
@@ -473,10 +471,11 @@ namespace DocPreview
 
     class Config
     {
-        public bool AutoRefresh;
-        public int DefaultZoom;
-        public Theme Theme;
-        public string CustomCss = XmlDocumentation.DocPreview.CustomCss;
+        public bool AutoRefresh { get; set; }
+        public int DefaultZoom { get; set; }
+        public Theme Theme { get; set; }
+
+        public string CustomCss { get; set; } = XmlDocumentation.DocPreview.CustomCss;
 
         public static Config Load()
         {

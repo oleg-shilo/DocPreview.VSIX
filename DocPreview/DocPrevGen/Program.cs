@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocPrevGen;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,7 +11,6 @@ using System.Web;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Xsl;
-using DocPrevGen;
 
 //Special thanks to Marek Stój for his excellent ImmDoc.NET (https://github.com/marek-stoj/ImmDoc.NET)
 //DocPreview uses the following ImmDoc.NET components:
@@ -22,6 +22,10 @@ namespace XmlDocumentation
 {
     static class Program
     {
+        // prevent the impact of accidental formatting of the template by CodeMaid
+        public static string CleanTemplate(this string template)
+            => template.Replace("        {$", "{$");
+
         /// <summary>
         /// Defines the entry point of the application.
         /// </summary>
@@ -116,7 +120,7 @@ namespace XmlDocumentation
 
         public static string GenerateErrorHtml(string errorText = "")
         {
-            string content = Resource1.template_light;
+            string content = Resource1.template_light.CleanTemplate();
 
             bool noUserContent = errorText == "";
 
@@ -139,12 +143,12 @@ namespace XmlDocumentation
 
         public static string GenerateHtml(string title, string signature, string xml)
         {
-            return GenerateHtml(title, signature, xml, Resource1.template_light);
+            return GenerateHtml(title, signature, xml, Resource1.template_light.CleanTemplate());
         }
 
         public static string GenerateRawHtml(string title, string signature, string xml)
         {
-            return GenerateHtml(title, signature, xml, Resource1.template_raw);
+            return GenerateHtml(title, signature, xml, Resource1.template_raw.CleanTemplate());
         }
 
         public static string HtmlDecorateMembers(params string[] content)

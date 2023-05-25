@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocPreview.Test", "DocPrevi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocPrevGen", "DocPrevGen\DocPrevGen.csproj", "{2CDBDC13-47C6-42AB-982F-5ECC62C483AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocPreview.Testpad", "DocPreview.Testpad\DocPreview.Testpad.csproj", "{0DDB9B18-367B-4C28-B7E3-41F1AA7C50EA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{2CDBDC13-47C6-42AB-982F-5ECC62C483AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CDBDC13-47C6-42AB-982F-5ECC62C483AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CDBDC13-47C6-42AB-982F-5ECC62C483AD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0DDB9B18-367B-4C28-B7E3-41F1AA7C50EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0DDB9B18-367B-4C28-B7E3-41F1AA7C50EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0DDB9B18-367B-4C28-B7E3-41F1AA7C50EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0DDB9B18-367B-4C28-B7E3-41F1AA7C50EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
