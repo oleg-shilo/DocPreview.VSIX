@@ -224,16 +224,25 @@ namespace XmlDocumentation
             }
         }
 
+        static void WrapContentInto(this XElement element, string name)
+        {
+            var oldName = element.Name;
+            element.Name = name;
+            var p = element.Parent;
+            element.Remove();
+
+            p.Add(new XElement(oldName, element));
+        }
+
         static void FixLists(XElement element)
         {
             //ImmDoc doesn't like items without descriptions (while Sandcastle is OK) so add them
             element.Descendants("item")
-                   .Where(x => x.Parent.Name == "list" && !x.HasElements)
+                   .Where(x => x.Parent.Name == "list" && !x.Elements("description").Any())
                    .ToList()
                    .ForEach(item =>
                    {
-                       string value = item.Value;
-                       item.Add(new XElement("description", value));
+                       item.WrapContentInto("description");
                    });
         }
 
@@ -547,6 +556,9 @@ namespace XmlDocumentation
 
             public static string ProcessComment(string contents)
             {
+                // contents = contents.Replace("<item>", "<li>").Replace("</item>", "</li>")
+                //                    .Replace("<list type=\"bullet\">", "<ul>").Replace("</list>", "</ul");
+
                 if (contents.Contains("<list")) // process lists only if there's at least one
                 {
                     contents = ProcessListsInComment(contents);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DocPreview.Test
 {
     /// <summary>
-    /// Class documentation
+    /// Class <b>ttt</b> documentation
     /// </summary>
     class GenericClass
     {
@@ -225,14 +225,37 @@ namespace DocPreview.Test
         /// If the target property is found and the expression evaluates to a valid primitive value, then a JValue
         /// is returned that includes the result of the expression.
         /// </item>
-        /// <item>
-        /// If the target property is found and evaluates to <b>null</b> then a JValue containing null is returned.
+        /// <item><description>
+        /// If the target property is found <see cref="member">Link text</see> and evaluates to <b>null</b> then a JValue containing null is returned.
+        /// </description>
         /// </item>
         /// <item>
         /// If the target property is not found, then null is returned.
         /// </item>
+        /// <item>
+        ///  <term><b>Assembly</b></term>
+        ///  <description>The library or executable built from a compilation.</description>
+        /// </item>
         /// </list>
         /// </returns>
         int foo { }
+
+        /// <summary>
+        /// <list type="number">
+        /// <listheader>
+        ///     <term>term</term>
+        ///     <description>description</description>
+        /// </listheader>
+        /// <item>
+        ///     <term>Assembly</term>
+        ///     <description>The library or executable built from a compilation.
+        ///     </description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <value>
+        /// The foo2.
+        /// </value>
+        int foo2 { }
     }
 }
