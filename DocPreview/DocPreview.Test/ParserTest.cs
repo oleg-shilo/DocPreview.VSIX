@@ -37,6 +37,17 @@ namespace DocPreview.Test
         }
 
         [Fact]
+        public void ParseInheritedDoc()
+        {
+            var file = @"D:\dev\Galos\DocPreview.VSIX\DocPreview\DocPreview.Test\GenericClass.cs";
+
+            Runtime.InitAssemblyProbing(true);
+
+            Parser.FindMemberDocumentationForType("DocPreview.Test.Test.foo", new[] { file });
+            // Parser.FindMemberDocumentationForType("DocPreview.Test.ITestInterface", new[] { @"D:\dev\Galos\DocPreview.VSIX\DocPreview\DocPreview.Test\GenericClass.cs" });
+        }
+
+        [Fact]
         public void ParseFullProp()
         {
             int line = 29;

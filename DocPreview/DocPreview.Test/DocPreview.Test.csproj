@@ -34,8 +34,23 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CodeAnalysis, Version=4.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DocPreview\lib\Microsoft.CodeAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp, Version=4.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DocPreview\lib\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DocPreview\lib\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -85,6 +100,11 @@
       <Project>{4b9917a9-fb25-40c6-a20d-33c60f451b12}</Project>
       <Name>DocPreview</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\DocPreview\lib\Microsoft.CodeAnalysis.CSharp.dll" />
+    <Analyzer Include="..\DocPreview\lib\Microsoft.CodeAnalysis.dll" />
+    <Analyzer Include="..\DocPreview\lib\System.Collections.Immutable.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

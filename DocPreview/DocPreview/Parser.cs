@@ -1,13 +1,26 @@
+// using ICSharpCode.NRefactory.CSharp;
+// using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+// using Microsoft.CodeAnalysis;
+
+// using Microsoft.CodeAnalysis.CSharp;
+
+// using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+// using Microsoft.CodeAnalysis.CSharp;
+// using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ICSharpCode.NRefactory.CSharp;
+using ms_CodeAnalysis = Microsoft.CodeAnalysis;
+
+using ms_Syntax = Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DocPreview
 {
-    public static class Parser
+    public static partial class Parser
     {
         public class Result
         {
@@ -17,20 +30,20 @@ namespace DocPreview
             public string XmlDocumentation;
         }
 
-        static bool IsDefaultUsingsStyle(SyntaxTree syntaxTree)
-        {
-            var firstNamespace = syntaxTree.Children.DeepAll(x => x is NamespaceDeclaration)
-                                                    .Cast<NamespaceDeclaration>()
-                                                    .FirstOrDefault();
+        // static bool IsDefaultUsingsStyle(SyntaxTree syntaxTree)
+        // {
+        //     var firstNamespace = syntaxTree.Children.DeepAll(x => x is NamespaceDeclaration)
+        //                                             .Cast<NamespaceDeclaration>()
+        //                                             .FirstOrDefault();
 
-            if (firstNamespace != null)
-            {
-                return !syntaxTree.Children.DeepAll(x => x is UsingDeclaration)
-                                           .Where(x => x.StartLocation.Line > firstNamespace.StartLocation.Line)
-                                           .Any();
-            }
-            return true;
-        }
+        //     if (firstNamespace != null)
+        //     {
+        //         return !syntaxTree.Children.DeepAll(x => x is UsingDeclaration)
+        //                                    .Where(x => x.StartLocation.Line > firstNamespace.StartLocation.Line)
+        //                                    .Any();
+        //     }
+        //     return true;
+        // }
 
         public static IEnumerable<Result> FindAllDocumentation(string code, string language = "CSharp")
         {
@@ -215,117 +228,117 @@ namespace DocPreview
             return result;
         }
 
-        public static Result FindMemberDocumentationNRefactoryNew(string code, int fromLine)
-        {
-            var result = new Result();
+        // public static Result FindMemberDocumentationNRefactoryNew(string code, int fromLine)
+        // {
+        //     var result = new Result();
 
-            var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
+        //     var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
 
-            var comment = syntaxTree.Children
-                                    .DeepAll(x => x is Comment)
-                                    .Cast<Comment>()
-                                    .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
-                                    .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
-                                    .OrderBy(x => x.Size)
-                                    .FirstOrDefault();
+        //     var comment = syntaxTree.Children
+        //                             .DeepAll(x => x is Comment)
+        //                             .Cast<Comment>()
+        //                             .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
+        //                             .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
+        //                             .OrderBy(x => x.Size)
+        //                             .FirstOrDefault();
 
-            if (comment != null)
-            {
-                var content = new StringBuilder();
-                content.AppendLine(comment.Node.Content);
+        //     if (comment != null)
+        //     {
+        //         var content = new StringBuilder();
+        //         content.AppendLine(comment.Node.Content);
 
-                var parent = comment.Node.Parent;
-                while (parent != null && (parent.NodeType != NodeType.Member))
-                {
-                    parent = parent.Parent;
-                }
+        //         var parent = comment.Node.Parent;
+        //         while (parent != null && (parent.NodeType != NodeType.Member))
+        //         {
+        //             parent = parent.Parent;
+        //         }
 
-                //parent is the declaration with the comments included shocking runtime difference
-                //comparing to the unit test environment
-                return null;
-                ///////////////////////////////////
-                var prevComment = comment.Node.PrevSibling as Comment;
-                while (prevComment != null && prevComment.CommentType == CommentType.Documentation)
-                {
-                    content.PrependLine(prevComment.Content);
-                    prevComment = prevComment.PrevSibling as Comment;
-                }
-                result.XmlDocumentation = content.ToString();
+        //         //parent is the declaration with the comments included shocking runtime difference
+        //         //comparing to the unit test environment
+        //         return null;
+        //         ///////////////////////////////////
+        //         var prevComment = comment.Node.PrevSibling as Comment;
+        //         while (prevComment != null && prevComment.CommentType == CommentType.Documentation)
+        //         {
+        //             content.PrependLine(prevComment.Content);
+        //             prevComment = prevComment.PrevSibling as Comment;
+        //         }
+        //         result.XmlDocumentation = content.ToString();
 
-                var nextNode = comment.Node.NextSibling;
-                while (nextNode != null && (nextNode.NodeType != NodeType.Member && nextNode.NodeType != NodeType.TypeDeclaration))
-                {
-                    nextNode = nextNode.NextSibling;
-                }
+        //         var nextNode = comment.Node.NextSibling;
+        //         while (nextNode != null && (nextNode.NodeType != NodeType.Member && nextNode.NodeType != NodeType.TypeDeclaration))
+        //         {
+        //             nextNode = nextNode.NextSibling;
+        //         }
 
-                if (nextNode != null && (nextNode.NodeType == NodeType.Member || nextNode.NodeType == NodeType.TypeDeclaration || nextNode.NodeType == NodeType.TypeDeclaration))
-                {
-                    //<membertype>:<signature>
-                    var signatureInfo = (nextNode.GetMemberSignature(code) ?? ":").Split(':');
-                    result.MemberTitle = signatureInfo[0];
-                    result.MemberDefinition = signatureInfo[1];
-                }
-                else
-                {
-                    result.MemberTitle = "Member";
-                    result.MemberDefinition = "[some member]";
-                }
-                result.Success = true;
-            }
+        //         if (nextNode != null && (nextNode.NodeType == NodeType.Member || nextNode.NodeType == NodeType.TypeDeclaration || nextNode.NodeType == NodeType.TypeDeclaration))
+        //         {
+        //             //<membertype>:<signature>
+        //             var signatureInfo = (nextNode.GetMemberSignature(code) ?? ":").Split(':');
+        //             result.MemberTitle = signatureInfo[0];
+        //             result.MemberDefinition = signatureInfo[1];
+        //         }
+        //         else
+        //         {
+        //             result.MemberTitle = "Member";
+        //             result.MemberDefinition = "[some member]";
+        //         }
+        //         result.Success = true;
+        //     }
 
-            return result;
-        }
+        //     return result;
+        // }
 
-        public static Result FindMemberDocumentationNRefactory(string code, int fromLine)
-        {
-            var result = new Result();
+        // public static Result FindMemberDocumentationNRefactory(string code, int fromLine)
+        // {
+        //     var result = new Result();
 
-            var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
+        //     var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
 
-            var comment = syntaxTree.Children
-                                    .DeepAll(x => x is Comment)
-                                    .Cast<Comment>()
-                                    .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
-                                    .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
-                                    .OrderBy(x => x.Size)
-                                    .FirstOrDefault();
+        //     var comment = syntaxTree.Children
+        //                             .DeepAll(x => x is Comment)
+        //                             .Cast<Comment>()
+        //                             .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
+        //                             .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
+        //                             .OrderBy(x => x.Size)
+        //                             .FirstOrDefault();
 
-            if (comment != null)
-            {
-                var content = new StringBuilder();
-                content.AppendLine(comment.Node.Content);
+        //     if (comment != null)
+        //     {
+        //         var content = new StringBuilder();
+        //         content.AppendLine(comment.Node.Content);
 
-                var prevComment = comment.Node.PrevSibling as Comment;
-                while (prevComment != null && prevComment.CommentType == CommentType.Documentation)
-                {
-                    content.PrependLine(prevComment.Content);
-                    prevComment = prevComment.PrevSibling as Comment;
-                }
-                result.XmlDocumentation = content.ToString();
+        //         var prevComment = comment.Node.PrevSibling as Comment;
+        //         while (prevComment != null && prevComment.CommentType == CommentType.Documentation)
+        //         {
+        //             content.PrependLine(prevComment.Content);
+        //             prevComment = prevComment.PrevSibling as Comment;
+        //         }
+        //         result.XmlDocumentation = content.ToString();
 
-                var nextNode = comment.Node.NextSibling;
-                while (nextNode != null && (nextNode.NodeType != NodeType.Member && nextNode.NodeType != NodeType.TypeDeclaration))
-                {
-                    nextNode = nextNode.NextSibling;
-                }
+        //         var nextNode = comment.Node.NextSibling;
+        //         while (nextNode != null && (nextNode.NodeType != NodeType.Member && nextNode.NodeType != NodeType.TypeDeclaration))
+        //         {
+        //             nextNode = nextNode.NextSibling;
+        //         }
 
-                if (nextNode != null && (nextNode.NodeType == NodeType.Member || nextNode.NodeType == NodeType.TypeDeclaration || nextNode.NodeType == NodeType.TypeDeclaration))
-                {
-                    //<membertype>:<signature>
-                    var signatureInfo = (nextNode.GetMemberSignature(code) ?? ":").Split(':');
-                    result.MemberTitle = signatureInfo[0];
-                    result.MemberDefinition = signatureInfo[1];
-                }
-                else
-                {
-                    result.MemberTitle = "Member";
-                    result.MemberDefinition = "[some member]";
-                }
-                result.Success = true;
-            }
+        //         if (nextNode != null && (nextNode.NodeType == NodeType.Member || nextNode.NodeType == NodeType.TypeDeclaration || nextNode.NodeType == NodeType.TypeDeclaration))
+        //         {
+        //             //<membertype>:<signature>
+        //             var signatureInfo = (nextNode.GetMemberSignature(code) ?? ":").Split(':');
+        //             result.MemberTitle = signatureInfo[0];
+        //             result.MemberDefinition = signatureInfo[1];
+        //         }
+        //         else
+        //         {
+        //             result.MemberTitle = "Member";
+        //             result.MemberDefinition = "[some member]";
+        //         }
+        //         result.Success = true;
+        //     }
 
-            return result;
-        }
+        //     return result;
+        // }
     }
 
     public static class Extensions
@@ -518,15 +531,15 @@ namespace DocPreview
             return sb.Insert(0, content + Environment.NewLine);
         }
 
-        public static string ToDisplayString(this IEnumerable<TypeParameterDeclaration> parameters)
-        {
-            return parameters.Any() ? "<...>" : "";
-        }
+        // public static string ToDisplayString(this IEnumerable<TypeParameterDeclaration> parameters)
+        // {
+        //     return parameters.Any() ? "<...>" : "";
+        // }
 
-        public static string ToDisplayString(this IEnumerable<ParameterDeclaration> parameters)
-        {
-            return parameters.Any() ? "..." : "";
-        }
+        // public static string ToDisplayString(this IEnumerable<ParameterDeclaration> parameters)
+        // {
+        //     return parameters.Any() ? "..." : "";
+        // }
 
         public static string FormatApiSignature(this string text)
         {
@@ -546,53 +559,53 @@ namespace DocPreview
                        .Replace("  ", " ");
         }
 
-        public static string GetMemberSignature(this AstNode node, string code)
-        {
-            if (node is MethodDeclaration)
-            {
-                var info = (MethodDeclaration)node;
-                return $"Method {info.Name}:{info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
-            }
-            else if (node is TypeDeclaration)
-            {
-                var info = (TypeDeclaration)node;
-                return $"{info.ClassType} {info.Name}:{info.ClassType.ToString().ToLower()} {info.Name}";
-            }
-            else if (node is DelegateDeclaration)
-            {
-                var info = (DelegateDeclaration)node;
-                return $"Delegate {info.Name}:delegate {info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
-            }
-            else if (node is ConstructorDeclaration)
-            {
-                var info = (ConstructorDeclaration)node;
-                return $"Constructor {info.Name}:{info.Name}({info.Parameters.ToDisplayString()})";
-            }
-            else if (node is PropertyDeclaration)
-            {
-                var info = (PropertyDeclaration)node;
-                return $"Property {info.Name}:{info.ReturnType} {info.Name};";
-            }
-            else if (node is FieldDeclaration)
-            {
-                var info = (FieldDeclaration)node;
+        // public static string GetMemberSignature(this AstNode node, string code)
+        // {
+        //     if (node is MethodDeclaration)
+        //     {
+        //         var info = (MethodDeclaration)node;
+        //         return $"Method {info.Name}:{info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
+        //     }
+        //     else if (node is TypeDeclaration)
+        //     {
+        //         var info = (TypeDeclaration)node;
+        //         return $"{info.ClassType} {info.Name}:{info.ClassType.ToString().ToLower()} {info.Name}";
+        //     }
+        //     else if (node is DelegateDeclaration)
+        //     {
+        //         var info = (DelegateDeclaration)node;
+        //         return $"Delegate {info.Name}:delegate {info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
+        //     }
+        //     else if (node is ConstructorDeclaration)
+        //     {
+        //         var info = (ConstructorDeclaration)node;
+        //         return $"Constructor {info.Name}:{info.Name}({info.Parameters.ToDisplayString()})";
+        //     }
+        //     else if (node is PropertyDeclaration)
+        //     {
+        //         var info = (PropertyDeclaration)node;
+        //         return $"Property {info.Name}:{info.ReturnType} {info.Name};";
+        //     }
+        //     else if (node is FieldDeclaration)
+        //     {
+        //         var info = (FieldDeclaration)node;
 
-                var name = info.Name;
-                if (!name.HasText())
-                    name = code.GetFieldName(info.StartLocation.Line - 1, info.EndLocation.Line - 1);
+        //         var name = info.Name;
+        //         if (!name.HasText())
+        //             name = code.GetFieldName(info.StartLocation.Line - 1, info.EndLocation.Line - 1);
 
-                return $"Field {name}:{info.ReturnType} {name}";
-            }
-            else if (node is EventDeclaration info)
-            {
-                var name = info.Name;
-                if (!name.HasText())
-                    name = code.GetFieldName(info.StartLocation.Line - 1, info.EndLocation.Line - 1);
+        //         return $"Field {name}:{info.ReturnType} {name}";
+        //     }
+        //     else if (node is EventDeclaration info)
+        //     {
+        //         var name = info.Name;
+        //         if (!name.HasText())
+        //             name = code.GetFieldName(info.StartLocation.Line - 1, info.EndLocation.Line - 1);
 
-                return $"Event {name}:event {info.ReturnType} {name}";
-            }
-            return null;
-        }
+        //         return $"Event {name}:event {info.ReturnType} {name}";
+        //     }
+        //     return null;
+        // }
 
         public static string GetFieldName(this string code, int startLine, int endLine)
         {
@@ -617,44 +630,44 @@ namespace DocPreview
             return text.Replace(Environment.NewLine, "\n").Split('\n');
         }
 
-        public static string GetNamespace(this EntityDeclaration node)
-        {
-            string result = "";
+        // public static string GetNamespace(this EntityDeclaration node)
+        // {
+        //     string result = "";
 
-            var parent = node.Parent;
-            while (parent != null)
-            {
-                if (parent is NamespaceDeclaration)
-                {
-                    if (result.HasText())
-                        result += ".";
-                    result += (parent as NamespaceDeclaration).Name;
-                }
-                parent = parent.Parent;
-            }
+        //     var parent = node.Parent;
+        //     while (parent != null)
+        //     {
+        //         if (parent is NamespaceDeclaration)
+        //         {
+        //             if (result.HasText())
+        //                 result += ".";
+        //             result += (parent as NamespaceDeclaration).Name;
+        //         }
+        //         parent = parent.Parent;
+        //     }
 
-            return result;
-        }
+        //     return result;
+        // }
 
-        public static IEnumerable<AstNode> DeepAll(this IEnumerable<AstNode> collection, Func<AstNode, bool> selector)
-        {
-            //pseudo recursion
-            var result = new List<AstNode>();
-            var queue = new Queue<AstNode>(collection);
+        // public static IEnumerable<AstNode> DeepAll(this IEnumerable<AstNode> collection, Func<AstNode, bool> selector)
+        // {
+        //     //pseudo recursion
+        //     var result = new List<AstNode>();
+        //     var queue = new Queue<AstNode>(collection);
 
-            while (queue.Count > 0)
-            {
-                AstNode node = queue.Dequeue();
-                if (selector(node))
-                    result.Add(node);
+        //     while (queue.Count > 0)
+        //     {
+        //         AstNode node = queue.Dequeue();
+        //         if (selector(node))
+        //             result.Add(node);
 
-                foreach (var subNode in node.Children)
-                {
-                    queue.Enqueue(subNode);
-                }
-            }
+        //         foreach (var subNode in node.Children)
+        //         {
+        //             queue.Enqueue(subNode);
+        //         }
+        //     }
 
-            return result;
-        }
+        //     return result;
+        // }
     }
 }

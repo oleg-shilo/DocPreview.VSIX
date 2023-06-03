@@ -212,7 +212,7 @@ namespace DocPreview.Test
         value3,
     }
 
-    class TestAgain
+    class Test
     {
         /// <summary>
         /// <b>Evaluate</b> the expression associated with the target property specified.
@@ -238,6 +238,7 @@ namespace DocPreview.Test
         /// </item>
         /// </list>
         /// </returns>
+        /// <code></code>
         int foo { }
 
         /// <summary>
@@ -256,6 +257,16 @@ namespace DocPreview.Test
         /// <value>
         /// The foo2.
         /// </value>
+        int foo2 { }
+    }
+
+    class TestAgain : Test
+    {
+        /// <inheritdoc />
+        int foo { }
+
+        /// <inheritdoc />
+        /// <remarks>This is a dummy class and always returns null.</remarks>
         int foo2 { }
     }
 }

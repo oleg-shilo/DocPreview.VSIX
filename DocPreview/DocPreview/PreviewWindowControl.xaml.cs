@@ -172,8 +172,19 @@ namespace DocPreview
             }
         }
 
+        class ttt
+        {
+        }
+
         void RefreshPreview(bool force = false)
         {
+            // try
+            // {
+            //     var ttt = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            //     //
+            //         }
+            // catch { }
+
             try
             {
                 if (config.Theme == Theme.Custom)
