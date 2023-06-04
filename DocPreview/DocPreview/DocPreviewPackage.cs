@@ -108,7 +108,7 @@ namespace DocPreview
             // not sited yet inside Visual Studio environment. The place to do all the other
             // initialization is the Initialize method.
 
-            Runtime.InitAssemblyProbing();
+            // Runtime.InitAssemblyProbing();
 
             //var textEditorEvents = Global.GetDTE2().Events.TextEditorEvents;
             //textEditorEvents.LineChanged += TextEditorEvents_LineChanged;

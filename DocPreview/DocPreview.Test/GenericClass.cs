@@ -211,62 +211,64 @@ namespace DocPreview.Test
         /// </summary>
         value3,
     }
-
-    class Test
+    class ParentClass
     {
-        /// <summary>
-        /// <b>Evaluate</b> the expression associated with the target property specified.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="JValue"/> containing the value of the expression evaluated. The following rules apply to the
-        /// return values:
-        /// <list type="bullet">
-        /// <item>
-        /// If the target property is found and the expression evaluates to a valid primitive value, then a JValue
-        /// is returned that includes the result of the expression.
-        /// </item>
-        /// <item><description>
-        /// If the target property is found <see cref="member">Link text</see> and evaluates to <b>null</b> then a JValue containing null is returned.
-        /// </description>
-        /// </item>
-        /// <item>
-        /// If the target property is not found, then null is returned.
-        /// </item>
-        /// <item>
-        ///  <term><b>Assembly</b></term>
-        ///  <description>The library or executable built from a compilation.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        /// <code></code>
-        int foo { }
+        class Test
+        {
+            /// <summary>
+            /// <b>Evaluate</b> the expression associated with the target property specified.
+            /// </summary>
+            /// <returns>
+            /// A <see cref="JValue"/> containing the value of the expression evaluated. The following rules apply to the
+            /// return values:
+            /// <list type="bullet">
+            /// <item>
+            /// If the target property is found and the expression evaluates to a valid primitive value, then a JValue
+            /// is returned that includes the result of the expression.
+            /// </item>
+            /// <item><description>
+            /// If the target property is found <see cref="member">Link text</see> and evaluates to <b>null</b> then a JValue containing null is returned.
+            /// </description>
+            /// </item>
+            /// <item>
+            /// If the target property is not found, then null is returned.
+            /// </item>
+            /// <item>
+            ///  <term><b>Assembly</b></term>
+            ///  <description>The library or executable built from a compilation.</description>
+            /// </item>
+            /// </list>
+            /// </returns>
+            /// <code></code>
+            int foo { }
 
-        /// <summary>
-        /// <list type="number">
-        /// <listheader>
-        ///     <term>term</term>
-        ///     <description>description</description>
-        /// </listheader>
-        /// <item>
-        ///     <term>Assembly</term>
-        ///     <description>The library or executable built from a compilation.
-        ///     </description>
-        /// </item>
-        /// </list>
-        /// </summary>
-        /// <value>
-        /// The foo2.
-        /// </value>
-        int foo2 { }
-    }
+            /// <summary>
+            /// <list type="number">
+            /// <listheader>
+            ///     <term>term</term>
+            ///     <description>description</description>
+            /// </listheader>
+            /// <item>
+            ///     <term>Assembly</term>
+            ///     <description>The library or executable built from a compilation.
+            ///     </description>
+            /// </item>
+            /// </list>
+            /// </summary>
+            /// <value>
+            /// The foo2.
+            /// </value>
+            int foo2 { }
+        }
 
-    class TestAgain : Test
-    {
-        /// <inheritdoc />
-        int foo { }
+        class TestAgain : Test
+        {
+            /// <inheritdoc />
+            int foo { }
 
-        /// <inheritdoc />
-        /// <remarks>This is a dummy class and always returns null.</remarks>
-        int foo2 { }
+            /// <inheritdoc />
+            /// <remarks>This is a dummy class and always returns null.</remarks>
+            int foo2 { }
+        }
     }
 }

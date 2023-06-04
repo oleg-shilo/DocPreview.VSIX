@@ -43,8 +43,7 @@ namespace DocPreview.Test
 
             Runtime.InitAssemblyProbing(true);
 
-            Parser.FindMemberDocumentationForType("DocPreview.Test.Test.foo", new[] { file });
-            // Parser.FindMemberDocumentationForType("DocPreview.Test.ITestInterface", new[] { @"D:\dev\Galos\DocPreview.VSIX\DocPreview\DocPreview.Test\GenericClass.cs" });
+            Parser.FindMemberDocumentationForType("DocPreview.Test.ParentClass.Test.foo", new[] { file });
         }
 
         [Fact]
