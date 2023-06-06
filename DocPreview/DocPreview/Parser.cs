@@ -630,44 +630,7 @@ namespace DocPreview
             return text.Replace(Environment.NewLine, "\n").Split('\n');
         }
 
-        // public static string GetNamespace(this EntityDeclaration node)
-        // {
-        //     string result = "";
-
-        //     var parent = node.Parent;
-        //     while (parent != null)
-        //     {
-        //         if (parent is NamespaceDeclaration)
-        //         {
-        //             if (result.HasText())
-        //                 result += ".";
-        //             result += (parent as NamespaceDeclaration).Name;
-        //         }
-        //         parent = parent.Parent;
-        //     }
-
-        //     return result;
-        // }
-
-        // public static IEnumerable<AstNode> DeepAll(this IEnumerable<AstNode> collection, Func<AstNode, bool> selector)
-        // {
-        //     //pseudo recursion
-        //     var result = new List<AstNode>();
-        //     var queue = new Queue<AstNode>(collection);
-
-        //     while (queue.Count > 0)
-        //     {
-        //         AstNode node = queue.Dequeue();
-        //         if (selector(node))
-        //             result.Add(node);
-
-        //         foreach (var subNode in node.Children)
-        //         {
-        //             queue.Enqueue(subNode);
-        //         }
-        //     }
-
-        //     return result;
-        // }
+        public static int GetLineFromPosition(this string text, int position)
+            => text.Substring(0, position).GetLines().Count();
     }
 }

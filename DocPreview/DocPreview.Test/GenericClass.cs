@@ -211,6 +211,7 @@ namespace DocPreview.Test
         /// </summary>
         value3,
     }
+
     class ParentClass
     {
         class Test

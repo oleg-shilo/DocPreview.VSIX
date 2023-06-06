@@ -6,10 +6,24 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Linq;
+using System.Text.Json;
 
 namespace DocPreview
 {
-    internal static class Global
+    public static class Extension
+    {
+        public static string ToJson(this object obj)
+        {
+            return JsonSerializer.Serialize(obj);
+        }
+
+        public static T FromJson<T>(this string json)
+        {
+            return JsonSerializer.Deserialize<T>(json);
+        }
+    }
+
+    public static class Global
     {
         static public Func<Type, object> GetService = Package.GetGlobalService;
 
@@ -28,9 +42,9 @@ namespace DocPreview
 
         public static int IndexOfAny(this string text, string[] patterns)
         {
-            var match = patterns.Select(x=>new { pos = text.IndexOf(x) })
-                                .Where(x=>x.pos != -1)
-                                .OrderBy(x=>x.pos)
+            var match = patterns.Select(x => new { pos = text.IndexOf(x) })
+                                .Where(x => x.pos != -1)
+                                .OrderBy(x => x.pos)
                                 .FirstOrDefault();
             if (match != null)
                 return match.pos;
