@@ -7,44 +7,56 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
 using System.Threading;
+using static DocPreview.PreviewWindowControl;
 using Task = System.Threading.Tasks.Task;
 
 namespace DocPreview
 {
     public static class Runtime
     {
+        static public IIdeServices Ide;
+
+        static bool initialized = false;
+
         static public void InitAssemblyProbing(bool isXUnitEnvir = false)
         {
-            var localDir = Path.GetDirectoryName(typeof(DocPreviewPackage).Assembly.Location);
-            void deploy_assembly(string name)
+            lock (typeof(Runtime))
             {
-                var file = Path.Combine(localDir, name + ".dll");
-                if (!File.Exists(file))
+                if (!initialized)
                 {
-                    object obj = ResourceAssemblies.ResourceManager.GetObject(name.Replace(".", "_"), ResourceAssemblies.Culture);
-                    var bytes = ((byte[])(obj));
-                    File.WriteAllBytes(file, bytes);
+                    var localDir = Path.GetDirectoryName(typeof(DocPreviewPackage).Assembly.Location);
+                    void deploy_assembly(string name)
+                    {
+                        var file = Path.Combine(localDir, name + ".dll");
+                        if (!File.Exists(file))
+                        {
+                            object obj = ResourceAssemblies.ResourceManager.GetObject(name.Replace(".", "_"), ResourceAssemblies.Culture);
+                            var bytes = ((byte[])(obj));
+                            File.WriteAllBytes(file, bytes);
+                        }
+                    }
+
+                    // deploy_assembly("Microsoft.CodeAnalysis");
+                    // deploy_assembly("Microsoft.CodeAnalysis.CSharp");
+                    // deploy_assembly("System.Collections.Immutable");
+
+                    if (isXUnitEnvir)
+                        deploy_assembly("System.Runtime.CompilerServices.Unsafe");
+
+                    AppDomain.CurrentDomain.AssemblyResolve += (object sender, ResolveEventArgs args) =>
+                    {
+                        try
+                        {
+                            var file = Path.Combine(localDir, args.Name.Split(',').FirstOrDefault() + ".dll");
+                            if (File.Exists(file))
+                                return Assembly.LoadFrom(file);
+                        }
+                        catch { }
+                        return null;
+                    };
+                    initialized = true;
                 }
             }
-
-            // deploy_assembly("Microsoft.CodeAnalysis");
-            // deploy_assembly("Microsoft.CodeAnalysis.CSharp");
-            // deploy_assembly("System.Collections.Immutable");
-
-            if (isXUnitEnvir)
-                deploy_assembly("System.Runtime.CompilerServices.Unsafe");
-
-            AppDomain.CurrentDomain.AssemblyResolve += (object sender, ResolveEventArgs args) =>
-            {
-                try
-                {
-                    var file = Path.Combine(localDir, args.Name.Split(',').FirstOrDefault() + ".dll");
-                    if (File.Exists(file))
-                        return Assembly.LoadFrom(file);
-                }
-                catch { }
-                return null;
-            };
         }
     }
 

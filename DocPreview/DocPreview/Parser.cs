@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 using ms_CodeAnalysis = Microsoft.CodeAnalysis;
 
 using ms_Syntax = Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,28 +29,17 @@ namespace DocPreview
             public string MemberTitle;
             public string MemberDefinition; //signature
             public string XmlDocumentation;
+            public string MemberName;
+            public MemberDeclarationType MemberDeclarationType;
+            public string MemberBaseType;
+            public string[] MemberModuleUsings;
         }
-
-        // static bool IsDefaultUsingsStyle(SyntaxTree syntaxTree)
-        // {
-        //     var firstNamespace = syntaxTree.Children.DeepAll(x => x is NamespaceDeclaration)
-        //                                             .Cast<NamespaceDeclaration>()
-        //                                             .FirstOrDefault();
-
-        //     if (firstNamespace != null)
-        //     {
-        //         return !syntaxTree.Children.DeepAll(x => x is UsingDeclaration)
-        //                                    .Where(x => x.StartLocation.Line > firstNamespace.StartLocation.Line)
-        //                                    .Any();
-        //     }
-        //     return true;
-        // }
 
         public static IEnumerable<Result> FindAllDocumentation(string code, string language = "CSharp")
         {
             var result = new List<Result>();
 
-            string[] lines = code.Lines().Where(x => x != null).ToArray();
+            string[] lines = code.GetLines().Where(x => x != null).ToArray();
 
             int docStart = -1;
 
@@ -86,32 +76,6 @@ namespace DocPreview
 
         public static Result FindMemberDocumentation(string code, int caretLine, string language = "CSharp")
         {
-            /*
-            C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Xamarin\Xamarin\4.0.0.1689
-
-            Quite shockingly Xamarin VS plugin is using ICSharpCode.NRefactory.dll - AssemblyFileVersion("5.5.1")
-            While this plugin relies on NuGet assembly ICSharpCode.NRefactory.dll - AssemblyFileVersion("5.2.0").
-            And the both assemblies are built as "Assembly ICSharpCode.NRefactory, Version 5.0.0.0"
-            SHOCKING!!!!
-            The assemblies are clearly different (file size and functionality wise) despite being both marked as the same version.
-
-            CLR cannot distinguish them and assembly probing gets so screwed that UnitTesting loads
-            one assembly file and VS (runtime) another one.
-
-            Xamarin should never ever distribute a conflicting assembly.
-
-            The outcome is - using NRefactory v5.0.0.0 is too risky as it's not clear when and where the asm probing
-            will fail again. And also there is no warranty that Xamarin wouldn't release yet another edition of
-            ICSharpCode.NRefactory v5.0.0.0.
-
-            Forcing (somehow) DocPreview to be loaded before Xamarin will fix the problem but it will
-            then screw Xamarin plugin.
-
-            I had no choice but to implement my own "poor-man" parser.
-
-            */
-            //FindMemberDocumentationNRefactoryNew(code, caretLine);
-
             string[] statementDelimiters = new string[] { ";", "{" };
 
             string xmlDocPreffix = GetXmlDocPrefix(language);
@@ -121,7 +85,7 @@ namespace DocPreview
             int fromLine = caretLine - 1;
 
             //poor man C# syntax parser. Too bad NRefactory conflicts with Xamarin
-            string[] lines = code.Lines().ToArray();
+            string[] lines = code.GetLines().ToArray();
             if (lines.Any() && lines.Last() == null)
                 lines = lines.Take(lines.Count() - 1).ToArray();
 
@@ -225,120 +189,59 @@ namespace DocPreview
                 result.XmlDocumentation = content.ToString().Trim();
                 result.Success = true;
             }
+
+            // process <inheritdoc ...> with Roslyn, which is only integrated with the extension for C#
+            if (result.Success && language == "CSharp")
+            {
+                if (result.XmlDocumentation.Contains("<inheritdoc"))
+                {
+                    // TODO
+                    // - Multiple source files
+                    // - Custom source name in the <inheritdoc...>
+                    // - Custom path in the <inheritdoc...>
+                    // + Class Members vs Class
+
+                    Result detailedResult = code.FindMemberTypeFromPosition(caretLine);
+
+                    var xmlDoc = detailedResult.XmlDocumentation.ParseAsMultirootXml();
+                    var newXmlDoc = "".ParseAsMultirootXml();
+
+                    foreach (var item in xmlDoc.Elements())
+                    {
+                        if (item.Name.LocalName == "inheritdoc")
+                        {
+                            var srcName = detailedResult.MemberBaseType;
+
+                            if (detailedResult.MemberDeclarationType == MemberDeclarationType.member)
+                                srcName += "." + detailedResult.MemberName.Split('.').Last();
+
+                            var allSourceFiles = Runtime.Ide.GetCodeBaseFiles();
+
+                            string inheritedDocXml = null;
+
+                            var possiblePrefixes = new List<string>();
+                            possiblePrefixes.AddRange(detailedResult.MemberName.GetParentNamespaces());
+                            possiblePrefixes.AddRange(detailedResult.MemberModuleUsings);
+
+                            inheritedDocXml = ($"{srcName}").FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles);
+
+                            if (!inheritedDocXml.HasText())
+                                inheritedDocXml = $"<summary>{new XText(result.XmlDocumentation).ToString()}</summary>";
+
+                            var inheritedDoc = inheritedDocXml.ParseAsMultirootXml();
+
+                            foreach (var i_item in inheritedDoc.Elements())
+                                newXmlDoc.Add(i_item);
+                        }
+                        else
+                            newXmlDoc.Add(item);
+                    }
+
+                    result.XmlDocumentation = newXmlDoc.ToString().Replace("<data>", "").Replace("</data>", "").Trim();
+                }
+            }
             return result;
         }
-
-        // public static Result FindMemberDocumentationNRefactoryNew(string code, int fromLine)
-        // {
-        //     var result = new Result();
-
-        //     var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
-
-        //     var comment = syntaxTree.Children
-        //                             .DeepAll(x => x is Comment)
-        //                             .Cast<Comment>()
-        //                             .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
-        //                             .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
-        //                             .OrderBy(x => x.Size)
-        //                             .FirstOrDefault();
-
-        //     if (comment != null)
-        //     {
-        //         var content = new StringBuilder();
-        //         content.AppendLine(comment.Node.Content);
-
-        //         var parent = comment.Node.Parent;
-        //         while (parent != null && (parent.NodeType != NodeType.Member))
-        //         {
-        //             parent = parent.Parent;
-        //         }
-
-        //         //parent is the declaration with the comments included shocking runtime difference
-        //         //comparing to the unit test environment
-        //         return null;
-        //         ///////////////////////////////////
-        //         var prevComment = comment.Node.PrevSibling as Comment;
-        //         while (prevComment != null && prevComment.CommentType == CommentType.Documentation)
-        //         {
-        //             content.PrependLine(prevComment.Content);
-        //             prevComment = prevComment.PrevSibling as Comment;
-        //         }
-        //         result.XmlDocumentation = content.ToString();
-
-        //         var nextNode = comment.Node.NextSibling;
-        //         while (nextNode != null && (nextNode.NodeType != NodeType.Member && nextNode.NodeType != NodeType.TypeDeclaration))
-        //         {
-        //             nextNode = nextNode.NextSibling;
-        //         }
-
-        //         if (nextNode != null && (nextNode.NodeType == NodeType.Member || nextNode.NodeType == NodeType.TypeDeclaration || nextNode.NodeType == NodeType.TypeDeclaration))
-        //         {
-        //             //<membertype>:<signature>
-        //             var signatureInfo = (nextNode.GetMemberSignature(code) ?? ":").Split(':');
-        //             result.MemberTitle = signatureInfo[0];
-        //             result.MemberDefinition = signatureInfo[1];
-        //         }
-        //         else
-        //         {
-        //             result.MemberTitle = "Member";
-        //             result.MemberDefinition = "[some member]";
-        //         }
-        //         result.Success = true;
-        //     }
-
-        //     return result;
-        // }
-
-        // public static Result FindMemberDocumentationNRefactory(string code, int fromLine)
-        // {
-        //     var result = new Result();
-
-        //     var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
-
-        //     var comment = syntaxTree.Children
-        //                             .DeepAll(x => x is Comment)
-        //                             .Cast<Comment>()
-        //                             .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
-        //                             .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
-        //                             .OrderBy(x => x.Size)
-        //                             .FirstOrDefault();
-
-        //     if (comment != null)
-        //     {
-        //         var content = new StringBuilder();
-        //         content.AppendLine(comment.Node.Content);
-
-        //         var prevComment = comment.Node.PrevSibling as Comment;
-        //         while (prevComment != null && prevComment.CommentType == CommentType.Documentation)
-        //         {
-        //             content.PrependLine(prevComment.Content);
-        //             prevComment = prevComment.PrevSibling as Comment;
-        //         }
-        //         result.XmlDocumentation = content.ToString();
-
-        //         var nextNode = comment.Node.NextSibling;
-        //         while (nextNode != null && (nextNode.NodeType != NodeType.Member && nextNode.NodeType != NodeType.TypeDeclaration))
-        //         {
-        //             nextNode = nextNode.NextSibling;
-        //         }
-
-        //         if (nextNode != null && (nextNode.NodeType == NodeType.Member || nextNode.NodeType == NodeType.TypeDeclaration || nextNode.NodeType == NodeType.TypeDeclaration))
-        //         {
-        //             //<membertype>:<signature>
-        //             var signatureInfo = (nextNode.GetMemberSignature(code) ?? ":").Split(':');
-        //             result.MemberTitle = signatureInfo[0];
-        //             result.MemberDefinition = signatureInfo[1];
-        //         }
-        //         else
-        //         {
-        //             result.MemberTitle = "Member";
-        //             result.MemberDefinition = "[some member]";
-        //         }
-        //         result.Success = true;
-        //     }
-
-        //     return result;
-        // }
     }
 
     public static class Extensions
@@ -461,6 +364,21 @@ namespace DocPreview
 
         static char[] wordDelimiters = "\r\t\n ".ToCharArray();
 
+        public static string[] GetParentNamespaces(this string @namespace)
+        {
+            var result = new List<string>();
+            var parts = @namespace.Split('.');
+
+            foreach (var item in parts.Take(parts.Length - 1))
+            {
+                if (result.Any())
+                    result.Add(result.Last() + "." + item);
+                else
+                    result.Add(item);
+            }
+            return result.ToArray();
+        }
+
         public static string[] Words(this string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -469,77 +387,10 @@ namespace DocPreview
             return input.Split(wordDelimiters, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        //public static string[] SplitByLast(this string input, char delimiter)
-        //{
-        //    return input.SplitBySingle(delimiter, true);
-        //}
-
-        //public static string[] SplitByFirst(this string input, char delimiter)
-        //{
-        //    return input.SplitBySingle(delimiter, false);
-        //}
-
-        //static string[] SplitBySingle(this string input, char delimiter, bool last)
-        //{
-        //    if (string.IsNullOrEmpty(input))
-        //        return new string[0];
-
-        // int pos;
-
-        // if (last) pos = input.LastIndexOf(delimiter); else pos = input.IndexOf(delimiter);
-
-        // if (pos != -1) return new string[] { input.Substring(0, pos), input.Substring(pos) };
-
-        //    return new string[] { input };
-        //}
-
-        //public static string[] SplitByFirst(this string input, string delimiter)
-        //{
-        //    return input.SplitBySingle(delimiter, false);
-        //}
-
-        //static string[] SplitBySingle(this string input, string delimiter, bool last)
-        //{
-        //    if (string.IsNullOrEmpty(input))
-        //        return new string[0];
-
-        // int pos;
-
-        // if (last) pos = input.LastIndexOf(delimiter); else pos = input.IndexOf(delimiter);
-
-        // if (pos != -1) { if (pos == 0) return new string[] { input.Substring(pos +
-        // delimiter.Length) }; else if (pos == input.Length - delimiter.Length - 1) return new
-        // string[] { input.Substring(pos) }; else return new string[] { input.Substring(0, pos),
-        // input.Substring(pos + delimiter.Length) };
-
-        //    }
-        //    return new string[] { input };
-        //}
-
-        public static IEnumerable<string> Lines(this string input)
-        {
-            string line;
-            using (var reader = new StringReader(input))
-                while ((line = reader.ReadLine()) != null)
-                    yield return line;
-
-            yield return null;
-        }
-
         public static StringBuilder PrependLine(this StringBuilder sb, string content)
         {
             return sb.Insert(0, content + Environment.NewLine);
         }
-
-        // public static string ToDisplayString(this IEnumerable<TypeParameterDeclaration> parameters)
-        // {
-        //     return parameters.Any() ? "<...>" : "";
-        // }
-
-        // public static string ToDisplayString(this IEnumerable<ParameterDeclaration> parameters)
-        // {
-        //     return parameters.Any() ? "..." : "";
-        // }
 
         public static string FormatApiSignature(this string text)
         {
@@ -559,57 +410,9 @@ namespace DocPreview
                        .Replace("  ", " ");
         }
 
-        // public static string GetMemberSignature(this AstNode node, string code)
-        // {
-        //     if (node is MethodDeclaration)
-        //     {
-        //         var info = (MethodDeclaration)node;
-        //         return $"Method {info.Name}:{info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
-        //     }
-        //     else if (node is TypeDeclaration)
-        //     {
-        //         var info = (TypeDeclaration)node;
-        //         return $"{info.ClassType} {info.Name}:{info.ClassType.ToString().ToLower()} {info.Name}";
-        //     }
-        //     else if (node is DelegateDeclaration)
-        //     {
-        //         var info = (DelegateDeclaration)node;
-        //         return $"Delegate {info.Name}:delegate {info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
-        //     }
-        //     else if (node is ConstructorDeclaration)
-        //     {
-        //         var info = (ConstructorDeclaration)node;
-        //         return $"Constructor {info.Name}:{info.Name}({info.Parameters.ToDisplayString()})";
-        //     }
-        //     else if (node is PropertyDeclaration)
-        //     {
-        //         var info = (PropertyDeclaration)node;
-        //         return $"Property {info.Name}:{info.ReturnType} {info.Name};";
-        //     }
-        //     else if (node is FieldDeclaration)
-        //     {
-        //         var info = (FieldDeclaration)node;
-
-        //         var name = info.Name;
-        //         if (!name.HasText())
-        //             name = code.GetFieldName(info.StartLocation.Line - 1, info.EndLocation.Line - 1);
-
-        //         return $"Field {name}:{info.ReturnType} {name}";
-        //     }
-        //     else if (node is EventDeclaration info)
-        //     {
-        //         var name = info.Name;
-        //         if (!name.HasText())
-        //             name = code.GetFieldName(info.StartLocation.Line - 1, info.EndLocation.Line - 1);
-
-        //         return $"Event {name}:event {info.ReturnType} {name}";
-        //     }
-        //     return null;
-        // }
-
         public static string GetFieldName(this string code, int startLine, int endLine)
         {
-            var lines = code.Lines().Skip(startLine).Take(endLine - startLine + 1).ToArray();
+            var lines = code.GetLines().Skip(startLine).Take(endLine - startLine + 1).ToArray();
             var declaration = string.Join("", lines).Split(';').First().Trim();
 
             var pos = declaration.Replace("\t", " ").LastIndexOf(' ');
@@ -620,15 +423,21 @@ namespace DocPreview
                 return declaration.Substring(pos).Trim();
         }
 
+        public static XElement ParseAsMultirootXml(this string xml)
+            => XDocument.Parse($"<data>{xml}</data>").Root;
+
         public static bool HasText(this string text)
         {
             return !string.IsNullOrEmpty(text);
         }
 
+        public static T[] ToSingleItemArray<T>(this T text) => new T[] { text };
+
+        public static string JoinBy(this IEnumerable<string> lines, string separator)
+            => string.Join(separator, lines);
+
         public static string[] GetLines(this string text)
-        {
-            return text.Replace(Environment.NewLine, "\n").Split('\n');
-        }
+            => text.Replace(Environment.NewLine, "\n").Split('\n');
 
         public static int GetLineFromPosition(this string text, int position)
             => text.Substring(0, position).GetLines().Count();

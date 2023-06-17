@@ -8,7 +8,15 @@ using Xunit;
 
 namespace DocPreview.Test
 {
-    public class ParserTest
+    public class TestBase
+    {
+        public TestBase()
+        {
+            Runtime.InitAssemblyProbing(true);
+        }
+    }
+
+    public class ParserTest : TestBase
     {
         static string code = File.ReadAllText("GenericClass.cs");
 
@@ -39,11 +47,17 @@ namespace DocPreview.Test
         [Fact]
         public void ParseInheritedDoc()
         {
-            var file = @"D:\dev\Galos\DocPreview.VSIX\DocPreview\DocPreview.Test\GenericClass.cs";
+            var file = Path.GetFullPath(@"..\..\GenericClass.cs");
 
-            Runtime.InitAssemblyProbing(true);
+            var result = Parser.FindMemberDocumentationForType("DocPreview.Test.ParentClass.Test.foo", "DocPreview.Test.ParentClass.Test".GetLines(), new[] { file });
+        }
 
-            Parser.FindMemberDocumentationForType("DocPreview.Test.ParentClass.Test.foo", new[] { file });
+        [Fact]
+        public void FindTypeMemberFromCaret()
+        {
+            var code = File.ReadAllText(@"..\..\GenericClass.cs");
+
+            var result = code.FindMemberTypeFromPosition(268);
         }
 
         [Fact]

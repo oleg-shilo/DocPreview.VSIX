@@ -214,6 +214,9 @@ namespace DocPreview.Test
 
     class ParentClass
     {
+        /// <summary>
+        /// Test class definition
+        /// </summary>
         class Test
         {
             /// <summary>
@@ -262,7 +265,8 @@ namespace DocPreview.Test
             int foo2 { }
         }
 
-        class TestAgain : Test
+        /// <inheritdoc />
+        class TestAgain : Test, ITest
         {
             /// <inheritdoc />
             int foo { }
@@ -271,5 +275,16 @@ namespace DocPreview.Test
             /// <remarks>This is a dummy class and always returns null.</remarks>
             int foo2 { }
         }
+
+        struct StructBase
+        {
+        }
+
+        /// <inheritdoc />
+        struct StructClass : StructBase, ITest
+        {
+        }
+
+        delegate int Deltest();
     }
 }

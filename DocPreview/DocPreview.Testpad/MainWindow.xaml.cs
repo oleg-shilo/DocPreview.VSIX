@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 using static DocPreview.PreviewWindowControl;
 
 namespace DocPreview.Testpad
@@ -29,7 +30,7 @@ namespace DocPreview.Testpad
 
         public MainWindow()
         {
-            PreviewWindowControl.Ide = this;
+            Runtime.Ide = this;
             config = Config.Load();
 
             InitializeComponent();
@@ -45,7 +46,7 @@ namespace DocPreview.Testpad
 
         public bool IsCurrentViewValid => !string.IsNullOrEmpty(config.LastLoadedFile);
 
-        public int? GetCurrentCaretLine() => this.Code.Text.Substring(0, this.Code.SelectionStart).GetLines().Count();
+        public int? GetCurrentCaretLine() => this.Code.Text.GetLineFromPosition(this.Code.SelectionStart) - 1;
 
         public string GetCurrentViewLanguage() => "CSharp";
 
@@ -101,9 +102,26 @@ namespace DocPreview.Testpad
 
         void Code_SelectionChanged(object sender, RoutedEventArgs e)
         {
-            // var currentLine = this.Code.Text.GetLineFromPosition(this.Code.SelectionStart);
             this.PreviewControl.AutoRefreshPreview();
         }
+
+        DispatcherTimer dispatcherTimer = new DispatcherTimer();
+
+        void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            dispatcherTimer.Tick += (a, b) =>
+            {
+                this.PreviewControl.RefreshPreview(true);
+                dispatcherTimer.Stop();
+            };
+            dispatcherTimer.Interval = TimeSpan.FromSeconds(1);
+            dispatcherTimer.Start();
+
+            ;
+        }
+
+        public string[] GetCodeBaseFiles()
+            => GetCurrentFileName().ToSingleItemArray();
     }
 
     class Config

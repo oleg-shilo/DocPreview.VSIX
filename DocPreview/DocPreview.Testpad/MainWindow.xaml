@@ -9,6 +9,7 @@
     Title="MainWindow"
     Width="825"
     Height="550"
+    Loaded="Window_Loaded"
     AllowDrop="True"
     Closing="Window_Closing"
     Drop="TextBox_Drop"

@@ -15,6 +15,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
+using static DocPreview.PreviewWindowControl;
 
 namespace DocPreview
 {
@@ -186,62 +187,11 @@ namespace DocPreview
             int? GetCurrentCaretLine();
 
             string GetCurrentFileName();
+
+            string[] GetCodeBaseFiles();
         }
 
-        class IdeServices : IIdeServices
-        {
-            public bool IsCurrentViewValid
-            {
-                get
-                {
-                    IWpfTextView textView = Global.GetTextView();
-                    ITextSnapshot snapshot = textView?.TextSnapshot;
-
-                    if (snapshot == null || snapshot != snapshot.TextBuffer.CurrentSnapshot)
-                        return false;
-
-                    if (textView?.Selection.IsEmpty != true)
-                        return false;
-
-                    return true;
-                }
-            }
-
-            public int? GetCurrentCaretLine()
-            {
-                IWpfTextView textView = Global.GetTextView();
-                if (textView != null)
-                {
-                    ITextSnapshot snapshot = textView.TextSnapshot;
-                    return snapshot.GetLineNumberFromPosition(textView.Caret.Position.BufferPosition);
-                }
-                return null;
-            }
-
-            public string GetCurrentViewLanguage()
-            {
-                IWpfTextView textView = Global.GetTextView();
-                return textView.TextBuffer.ContentType.TypeName;
-            }
-
-            public string GetCurrentViewText()
-            {
-                IWpfTextView textView = Global.GetTextView();
-                if (textView != null)
-                {
-                    ITextSnapshot snapshot = textView.TextSnapshot;
-                    int caretLineNumber = snapshot.GetLineNumberFromPosition(textView.Caret.Position.BufferPosition);
-                    return snapshot.GetText();
-                }
-                return null;
-            }
-
-            public string GetCurrentFileName() => Global.GetDTE2().ActiveDocument.FullName;
-        }
-
-        static public IIdeServices Ide = new IdeServices();
-
-        void RefreshPreview(bool force = false)
+        public void RefreshPreview(bool force = false)
         {
             try
             {
@@ -253,13 +203,13 @@ namespace DocPreview
                 if (force)
                     protectDisplayedProductInfo = false;
 
-                string language = Ide.GetCurrentViewLanguage();
+                string language = Runtime.Ide.GetCurrentViewLanguage();
 
-                if (Ide.IsCurrentViewValid && (language == "CSharp" || language == "F#" || language == "C/C++" || language == "Basic"))
+                if (Runtime.Ide.IsCurrentViewValid && (language == "CSharp" || language == "F#" || language == "C/C++" || language == "Basic"))
                 {
-                    string fileName = Ide.GetCurrentFileName();
-                    int caretLineNumber = Ide.GetCurrentCaretLine().Value;
-                    string code = Ide.GetCurrentViewText();
+                    string fileName = Runtime.Ide.GetCurrentFileName();
+                    int caretLineNumber = Runtime.Ide.GetCurrentCaretLine().Value;
+                    string code = Runtime.Ide.GetCurrentViewText();
 
                     if (force || (fileName != lastPreviewFileName || caretLineNumber != lastPreviewLineNumber || code != lastPreviewAllText))
                     {
