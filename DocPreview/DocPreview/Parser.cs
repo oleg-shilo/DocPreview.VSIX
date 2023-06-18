@@ -11,6 +11,7 @@
 // using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -75,6 +76,81 @@ namespace DocPreview
         }
 
         public static Result FindMemberDocumentation(string code, int caretLine, string language = "CSharp")
+        {
+            Result result = FindMemberDocumentationSimple(code, caretLine, language);
+
+            // process <inheritdoc ...> with Roslyn, which is only integrated with the extension for C#
+            if (result.Success && language == "CSharp")
+            {
+                if (result.XmlDocumentation.Contains("<inheritdoc"))
+                {
+                    // TODO
+                    // <inheritdoc> spec: https://tunnelvisionlabs.github.io/SHFB/docs-master/SandcastleBuilder/html/79897974-ffc9-4b84-91a5-e50c66a0221d.htm
+                    // + Multiple source files
+                    // + Custom source name in the <inheritdoc...> (limitations: no external assembly support; overloaded signatures in cref)
+                    // - Custom path in the <inheritdoc...>
+                    // + Class Members vs Class
+
+                    Result detailedResult = code.FindMemberTypeFromPosition(caretLine);
+
+                    var xmlDoc = detailedResult.XmlDocumentation.ParseAsMultirootXml();
+                    var newXmlDoc = "".ParseAsMultirootXml();
+
+                    foreach (var item in xmlDoc.Elements())
+                    {
+                        if (item.Name.LocalName == "inheritdoc")
+                        {
+                            var srcName = item.Attribute("cref")?.Value;
+
+                            if (srcName == null || !srcName.Contains(".")) // `cref=` is absent or contains base class member name only
+                            {
+                                if (srcName.HasText()) // member is specified in 'cref' attribute
+                                {
+                                    srcName = detailedResult.MemberBaseType + "." + srcName;
+                                }
+                                else
+                                {
+                                    srcName = detailedResult.MemberBaseType;
+
+                                    if (detailedResult.MemberDeclarationType == MemberDeclarationType.member)
+                                        srcName += "." + detailedResult.MemberName.Split('.').Last();
+                                }
+                            }
+
+                            var allSourceFiles = Runtime.Ide.GetCodeBaseFiles();
+
+                            string inheritedDocXml = null;
+
+                            var possiblePrefixes = new List<string>();
+                            possiblePrefixes.AddRange(detailedResult.MemberName.GetParentNamespaces());
+                            possiblePrefixes.AddRange(detailedResult.MemberModuleUsings);
+
+                            Debug.WriteLine("--------------");
+                            Debug.WriteLine("member: " + srcName);
+                            Debug.WriteLine("prefixes:");
+                            possiblePrefixes.ForEach(x => Debug.WriteLine("   " + x));
+
+                            inheritedDocXml = ($"{srcName}").FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles);
+
+                            if (!inheritedDocXml.HasText())
+                                inheritedDocXml = $"<summary>{new XText(result.XmlDocumentation).ToString()}</summary>";
+
+                            var inheritedDoc = inheritedDocXml.ParseAsMultirootXml();
+
+                            foreach (var i_item in inheritedDoc.Elements())
+                                newXmlDoc.Add(i_item);
+                        }
+                        else
+                            newXmlDoc.Add(item);
+                    }
+
+                    result.XmlDocumentation = newXmlDoc.ToString().Replace("<data>", "").Replace("</data>", "").Trim();
+                }
+            }
+            return result;
+        }
+
+        private static Result FindMemberDocumentationSimple(string code, int caretLine, string language)
         {
             string[] statementDelimiters = new string[] { ";", "{" };
 
@@ -190,56 +266,6 @@ namespace DocPreview
                 result.Success = true;
             }
 
-            // process <inheritdoc ...> with Roslyn, which is only integrated with the extension for C#
-            if (result.Success && language == "CSharp")
-            {
-                if (result.XmlDocumentation.Contains("<inheritdoc"))
-                {
-                    // TODO
-                    // - Multiple source files
-                    // - Custom source name in the <inheritdoc...>
-                    // - Custom path in the <inheritdoc...>
-                    // + Class Members vs Class
-
-                    Result detailedResult = code.FindMemberTypeFromPosition(caretLine);
-
-                    var xmlDoc = detailedResult.XmlDocumentation.ParseAsMultirootXml();
-                    var newXmlDoc = "".ParseAsMultirootXml();
-
-                    foreach (var item in xmlDoc.Elements())
-                    {
-                        if (item.Name.LocalName == "inheritdoc")
-                        {
-                            var srcName = detailedResult.MemberBaseType;
-
-                            if (detailedResult.MemberDeclarationType == MemberDeclarationType.member)
-                                srcName += "." + detailedResult.MemberName.Split('.').Last();
-
-                            var allSourceFiles = Runtime.Ide.GetCodeBaseFiles();
-
-                            string inheritedDocXml = null;
-
-                            var possiblePrefixes = new List<string>();
-                            possiblePrefixes.AddRange(detailedResult.MemberName.GetParentNamespaces());
-                            possiblePrefixes.AddRange(detailedResult.MemberModuleUsings);
-
-                            inheritedDocXml = ($"{srcName}").FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles);
-
-                            if (!inheritedDocXml.HasText())
-                                inheritedDocXml = $"<summary>{new XText(result.XmlDocumentation).ToString()}</summary>";
-
-                            var inheritedDoc = inheritedDocXml.ParseAsMultirootXml();
-
-                            foreach (var i_item in inheritedDoc.Elements())
-                                newXmlDoc.Add(i_item);
-                        }
-                        else
-                            newXmlDoc.Add(item);
-                    }
-
-                    result.XmlDocumentation = newXmlDoc.ToString().Replace("<data>", "").Replace("</data>", "").Trim();
-                }
-            }
             return result;
         }
     }

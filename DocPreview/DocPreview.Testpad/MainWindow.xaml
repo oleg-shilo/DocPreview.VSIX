@@ -9,10 +9,10 @@
     Title="MainWindow"
     Width="825"
     Height="550"
-    Loaded="Window_Loaded"
     AllowDrop="True"
     Closing="Window_Closing"
     Drop="TextBox_Drop"
+    Loaded="Window_Loaded"
     mc:Ignorable="d">
     <Grid Visibility="Visible">
 
@@ -20,6 +20,7 @@
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
                     <MenuItem Click="MenuItem_OpenClick" Header="_Open" />
+                    <MenuItem Click="MenuItem_ReloadClick" Header="_Reload" />
                     <MenuItem Click="MenuItem_SaveClick" Header="_Save" />
                 </MenuItem>
             </Menu>
@@ -39,8 +40,8 @@
                     AcceptsTab="True"
                     AllowDrop="True"
                     HorizontalScrollBarVisibility="Auto"
-                    SelectionChanged="Code_SelectionChanged"
                     PreviewDragOver="TextBox_PreviewDragOver"
+                    SelectionChanged="Code_SelectionChanged"
                     TextWrapping="Wrap"
                     VerticalScrollBarVisibility="Auto" />
                 <GridSplitter

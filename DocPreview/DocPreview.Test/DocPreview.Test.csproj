@@ -65,7 +65,7 @@
   <ItemGroup>
     <Compile Include="GenericTest.cs" />
     <Compile Include="ParserTest.cs" />
-    <Compile Include="TestBase1Base.cs" />
+    <Compile Include="TestBase.cs" />
     <None Include="GenericClass.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -86,20 +86,6 @@ namespace DocPreview.Testpad
             e.Handled = true;
         }
 
-        void MenuItem_OpenClick(object sender, RoutedEventArgs e)
-        {
-            var openFileDialog = new OpenFileDialog();
-            openFileDialog.CheckPathExists = true;
-            openFileDialog.RestoreDirectory = true;
-            if (openFileDialog.ShowDialog() == true)
-                LoadFile(openFileDialog.FileName);
-        }
-
-        void MenuItem_SaveClick(object sender, RoutedEventArgs e)
-        {
-            File.WriteAllText(config.LastLoadedFile, this.Code.Text);
-        }
-
         void Code_SelectionChanged(object sender, RoutedEventArgs e)
         {
             this.PreviewControl.AutoRefreshPreview();
@@ -122,6 +108,29 @@ namespace DocPreview.Testpad
 
         public string[] GetCodeBaseFiles()
             => GetCurrentFileName().ToSingleItemArray();
+
+        void MenuItem_OpenClick(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog();
+            openFileDialog.CheckPathExists = true;
+            openFileDialog.RestoreDirectory = true;
+            if (openFileDialog.ShowDialog() == true)
+                LoadFile(openFileDialog.FileName);
+        }
+
+        void MenuItem_SaveClick(object sender, RoutedEventArgs e)
+        {
+            File.WriteAllText(config.LastLoadedFile, this.Code.Text);
+        }
+
+        void MenuItem_ReloadClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                LoadFile(config.LastLoadedFile);
+            }
+            catch { }
+        }
     }
 
     class Config

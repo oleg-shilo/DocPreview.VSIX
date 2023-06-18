@@ -5,17 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
+using static DocPreview.PreviewWindowControl;
 
 namespace DocPreview.Test
 {
-    public class TestBase
-    {
-        public TestBase()
-        {
-            Runtime.InitAssemblyProbing(true);
-        }
-    }
-
     public class ParserTest : TestBase
     {
         static string code = File.ReadAllText("GenericClass.cs");
@@ -45,11 +39,72 @@ namespace DocPreview.Test
         }
 
         [Fact]
-        public void ParseInheritedDoc()
+        public void InheritedDoc_Single()
+        {
+            //  /// <inheritdoc />
+            //  int foo { }
+            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 271);
+            Assert.True(result.Success);
+            Assert.NotEmpty(result.XmlDocumentation);
+        }
+
+        [Fact]
+        public void InheritedDoc_CustomSource()
+        {
+            //   /// <inheritdoc cref="DocPreview.Test.ParentClass.Test.foo2"/>
+            //   /// <remarks>This is a dummy class and always returns null.</remarks>
+            //   int foo3 { }
+            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 278);
+            Assert.True(result.Success);
+            Assert.NotEmpty(result.XmlDocumentation);
+            Assert.Contains("FOO2", result.XmlDocumentation);
+        }
+
+        [Fact]
+        public void InheritedDoc_ExternalSource()
+        {
+            //    /// <inheritdoc cref="DocPreview.Test.TestBase.TestBase"/>
+            //    struct StructClass : StructBase, ITest
+
+            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 312);
+            Assert.True(result.Success);
+            Assert.NotEmpty(result.XmlDocumentation);
+            Assert.Contains("instance of the <see cref=\"TestBase\"", result.XmlDocumentation);
+        }
+
+        [Fact]
+        public void InheritedDoc_Complex()
+        {
+            //   /// <inheritdoc />
+            //   /// <remarks>This is a dummy class and always returns null.</remarks>
+            //   int foo2 { }
+            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 274);
+            Assert.True(result.Success);
+            Assert.NotEmpty(result.XmlDocumentation);
+            Assert.Contains("dummy class and always", result.XmlDocumentation);
+        }
+
+        [Fact]
+        public void InheritedDoc_OverloadedSource()
+        {
+            //    /// <inheritdoc cref="foo" />
+            //    int foo(int arg1, string arg2) { }
+
+            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 315);
+            Assert.True(result.Success);
+            Assert.NotEmpty(result.XmlDocumentation);
+            // Assert.Contains("specified arg1, arg2", result.XmlDocumentation);
+        }
+
+        [Fact]
+        public void FindMemberDocumentationForType()
         {
             var file = Path.GetFullPath(@"..\..\GenericClass.cs");
 
-            var result = Parser.FindMemberDocumentationForType("DocPreview.Test.ParentClass.Test.foo", "DocPreview.Test.ParentClass.Test".GetLines(), new[] { file });
+            var result = Parser.FindMemberDocumentationForType(
+                "DocPreview.Test.ParentClass.Test.foo",
+                "DocPreview.Test.ParentClass.Test".GetLines(),
+                new[] { file });
         }
 
         [Fact]

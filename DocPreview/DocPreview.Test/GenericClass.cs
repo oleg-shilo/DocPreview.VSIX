@@ -220,7 +220,7 @@ namespace DocPreview.Test
         class Test
         {
             /// <summary>
-            /// <b>Evaluate</b> the expression associated with the target property specified.
+            /// FOO <b>Evaluate</b> the expression associated with the target property specified.
             /// </summary>
             /// <returns>
             /// A <see cref="JValue"/> containing the value of the expression evaluated. The following rules apply to the
@@ -247,7 +247,7 @@ namespace DocPreview.Test
             int foo { }
 
             /// <summary>
-            /// <list type="number">
+            /// FOO2 <list type="number">
             /// <listheader>
             ///     <term>term</term>
             ///     <description>description</description>
@@ -274,6 +274,16 @@ namespace DocPreview.Test
             /// <inheritdoc />
             /// <remarks>This is a dummy class and always returns null.</remarks>
             int foo2 { }
+
+            /// <inheritdoc cref="DocPreview.Test.ParentClass.Test.foo2"/>
+            /// <remarks>This is a dummy class and always returns null.</remarks>
+            int foo3 { }
+
+            /// <inheritdoc cref="Object.ToString" />
+            public override string ToString()
+            {
+                return base.ToString();
+            }
         }
 
         struct StructBase
@@ -283,6 +293,30 @@ namespace DocPreview.Test
         /// <inheritdoc />
         struct StructClass : StructBase, ITest
         {
+            /// <summary>
+            /// Fooes the specified arg1.
+            /// </summary>
+            /// <param name="arg1">The arg1.</param>
+            /// <returns></returns>
+            int foo(int arg1) { }
+
+            /// <summary>
+            /// Fooes the specified arg1, arg2.
+            /// </summary>
+            /// <param name="arg1">The arg1.</param>
+            /// <param name="arg2">The arg2.</param>
+            /// <returns></returns>
+            int foo(int arg1, string arg2) { }
+        }
+
+        /// <inheritdoc cref="DocPreview.Test.TestBase.TestBase"/>
+        struct StructSuperClass : StructClass, ITest
+        {
+            /// <inheritdoc cref="foo(int, string)" />
+            int foo(int arg1, string arg2) { }
+
+            /// <inheritdoc />
+            int foo(int arg1) { }
         }
 
         delegate int Deltest();

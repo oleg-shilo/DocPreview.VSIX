@@ -16,7 +16,7 @@ namespace DocPreview
     {
         static public IIdeServices Ide;
 
-        static bool initialized = false;
+        static public bool initialized = false;
 
         static public void InitAssemblyProbing(bool isXUnitEnvir = false)
         {
