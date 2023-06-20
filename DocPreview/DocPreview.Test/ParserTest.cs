@@ -85,6 +85,18 @@ namespace DocPreview.Test
         }
 
         [Fact]
+        public void InheritedDoc_ComplexDeepInheritance()
+        {
+            //  /// <inheritdoc />
+            //  int foo3(int arg1, string arg2, string arg3) { }
+
+            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 339);
+            Assert.True(result.Success);
+            Assert.NotEmpty(result.XmlDocumentation);
+            Assert.Contains("Fooes the specified arg1-3", result.XmlDocumentation);
+        }
+
+        [Fact]
         public void InheritedDoc_OverloadedSource()
         {
             //    /// <inheritdoc cref="foo" />

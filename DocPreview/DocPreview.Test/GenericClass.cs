@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -288,6 +288,14 @@ namespace DocPreview.Test
 
         struct StructBase
         {
+            /// <summary>
+            /// Fooes the specified arg1-3.
+            /// </summary>
+            /// <param name="arg1">The arg1.</param>
+            /// <param name="arg2">The arg2.</param>
+            /// <param name="arg3">The arg3.</param>
+            /// <returns></returns>
+            int foo3(int arg1, string arg2, string arg3) { }
         }
 
         /// <inheritdoc />
@@ -307,6 +315,19 @@ namespace DocPreview.Test
             /// <param name="arg2">The arg2.</param>
             /// <returns></returns>
             int foo(int arg1, string arg2) { }
+
+            /// <summary>
+            /// This overloaded method does something
+            /// </summary>
+            /// <param name="p1">The string parameter p1</param>
+            /// <overloads>
+            /// <summary>There are three overloads for this method.</summary>
+            /// <remarks>These remarks are from the overloads tag on the
+            /// first version.</remarks>
+            /// </overloads>
+            public void OverloadedMethod(string p1)
+            {
+            }
         }
 
         /// <inheritdoc cref="DocPreview.Test.TestBase.TestBase"/>
@@ -316,9 +337,18 @@ namespace DocPreview.Test
             int foo(int arg1, string arg2) { }
 
             /// <inheritdoc />
-            int foo(int arg1) { }
-        }
+            int foo3(int arg1, string arg2, string arg3) { }
 
-        delegate int Deltest();
+            /// <inheritdoc />
+            int foo(int arg1) { }
+
+            /// <inheritdoc cref="OverloadedMethod(string)"
+            ///     select="param|overloads/*" />
+            /// <param name="x">An integer parameter</param>
+            public void OverloadedMethod(string p1, int x)
+            {
+            }
+
+            delegate int Deltest();
+        }
     }
-}

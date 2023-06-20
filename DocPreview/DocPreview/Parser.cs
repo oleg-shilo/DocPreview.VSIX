@@ -14,8 +14,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using ms_CodeAnalysis = Microsoft.CodeAnalysis;
 
 using ms_Syntax = Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,6 +35,7 @@ namespace DocPreview
             public string MemberName;
             public MemberDeclarationType MemberDeclarationType;
             public string MemberBaseType;
+            public string[] InheritanceChain;
             public string[] MemberModuleUsings;
         }
 
@@ -87,8 +90,11 @@ namespace DocPreview
                     // TODO
                     // <inheritdoc> spec: https://tunnelvisionlabs.github.io/SHFB/docs-master/SandcastleBuilder/html/79897974-ffc9-4b84-91a5-e50c66a0221d.htm
                     // + Multiple source files
-                    // + Custom source name in the <inheritdoc...> (limitations: no external assembly support; overloaded signatures in cref)
-                    // - Custom path in the <inheritdoc...>
+                    // - Custom source name in the <inheritdoc...>
+                    //   - limitations: no external assembly support;
+                    //   - overloaded signatures in cref should support the resolution priority
+                    // + Custom path in the <inheritdoc...>
+                    // - Root level inheriting is not supported
                     // + Class Members vs Class
 
                     Result detailedResult = code.FindMemberTypeFromPosition(caretLine);
@@ -100,42 +106,72 @@ namespace DocPreview
                     {
                         if (item.Name.LocalName == "inheritdoc")
                         {
-                            var srcName = item.Attribute("cref")?.Value;
-
-                            if (srcName == null || !srcName.Contains(".")) // `cref=` is absent or contains base class member name only
-                            {
-                                if (srcName.HasText()) // member is specified in 'cref' attribute
-                                {
-                                    srcName = detailedResult.MemberBaseType + "." + srcName;
-                                }
-                                else
-                                {
-                                    srcName = detailedResult.MemberBaseType;
-
-                                    if (detailedResult.MemberDeclarationType == MemberDeclarationType.member)
-                                        srcName += "." + detailedResult.MemberName.Split('.').Last();
-                                }
-                            }
+                            var crefName = item.Attribute("cref")?.Value;
+                            var selectPath = item.Attribute("select")?.Value;
 
                             var allSourceFiles = Runtime.Ide.GetCodeBaseFiles();
-
-                            string inheritedDocXml = null;
 
                             var possiblePrefixes = new List<string>();
                             possiblePrefixes.AddRange(detailedResult.MemberName.GetParentNamespaces());
                             possiblePrefixes.AddRange(detailedResult.MemberModuleUsings);
-
-                            Debug.WriteLine("--------------");
-                            Debug.WriteLine("member: " + srcName);
-                            Debug.WriteLine("prefixes:");
                             possiblePrefixes.ForEach(x => Debug.WriteLine("   " + x));
 
-                            inheritedDocXml = ($"{srcName}").FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles);
+                            string inheritedDocXml = null;
+
+                            if (crefName?.Contains(".") == true) // explicit base type definition i.e. cref="Test.foo"
+                            {
+                                inheritedDocXml = ($"{crefName}").FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles)?.XmlDocumentation;
+                            }
+                            else
+                            {
+                                string srcName = crefName ?? detailedResult.MemberName.Split('.').Last();
+
+                                var queue = new Queue<string>();
+
+                                detailedResult.InheritanceChain.ToList().ForEach(queue.Enqueue);
+
+                                while (queue.Any())
+                                {
+                                    var type = queue.Dequeue();
+
+                                    var lookupName = (detailedResult.MemberDeclarationType == MemberDeclarationType.member) ?
+                                                     $"{type}.{srcName}" :  // get XML doc from a base type member (e.g. Test.foo)
+                                                     type;                  // get XML doc from a base type definition
+
+                                    Debug.WriteLine("--------------");
+                                    Debug.WriteLine("member: " + lookupName);
+                                    Debug.WriteLine("prefixes:");
+
+                                    var lookupResult = lookupName.FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles);
+
+                                    inheritedDocXml = lookupResult.XmlDocumentation;
+
+                                    if (inheritedDocXml.HasText())
+                                        break;
+
+                                    lookupResult.InheritanceChain?.ToList().ForEach(queue.Enqueue);
+                                }
+                            }
 
                             if (!inheritedDocXml.HasText())
-                                inheritedDocXml = $"<summary>{new XText(result.XmlDocumentation).ToString()}</summary>";
+                                inheritedDocXml = $"<summary>{new XText(result.XmlDocumentation)}</summary>";
 
                             var inheritedDoc = inheritedDocXml.ParseAsMultirootXml();
+
+                            if (selectPath.HasText())
+                            {
+                                var selectedXml = "";
+
+                                using (var sr = new StringReader($"<root>{inheritedDocXml}</root>"))
+                                {
+                                    var nav = new XPathDocument(sr).CreateNavigator();
+                                    nav.MoveToFirstChild();
+                                    var path_result = nav.Evaluate(selectPath);
+                                    foreach (XPathNavigator n in nav.Select(selectPath))
+                                        selectedXml += n.OuterXml;
+                                }
+                                inheritedDoc = selectedXml.ParseAsMultirootXml();
+                            }
 
                             foreach (var i_item in inheritedDoc.Elements())
                                 newXmlDoc.Add(i_item);
