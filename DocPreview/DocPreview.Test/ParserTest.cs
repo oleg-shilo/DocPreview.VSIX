@@ -63,14 +63,30 @@ namespace DocPreview.Test
         [Fact]
         public void InheritedDoc_ExternalSource()
         {
-            //    /// <inheritdoc cref="DocPreview.Test.TestBase.TestBase"/>
+            //    /// <inheritdoc cref="DocPreview.Test.TestBase"/>
             //    struct StructClass : StructBase, ITest
 
-            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 312);
+            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 301);
+            Assert.True(result.Success);
+            Assert.NotEmpty(result.XmlDocumentation);
+            Assert.Contains("TestBaseClass", result.XmlDocumentation);
+        }
+
+        [Fact]
+        public void InheritedDoc_ExternalSourceConstructor()
+        {
+            //    /// <inheritdoc cref="DocPreview.Test.TestBase.TestBase()"/>
+            //    public StructClass()
+
+            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 304);
             Assert.True(result.Success);
             Assert.NotEmpty(result.XmlDocumentation);
             Assert.Contains("instance of the <see cref=\"TestBase\"", result.XmlDocumentation);
         }
+
+        // TODO: <inheritdoc>
+        // - <inheritdoc cref="DocPreview.Test.ParentClass.Test.foo2"/>
+        // - handling members without <inheritdoc> but with parent type marked as <inheritdoc
 
         [Fact]
         public void InheritedDoc_Complex()
@@ -90,7 +106,7 @@ namespace DocPreview.Test
             //  /// <inheritdoc />
             //  int foo3(int arg1, string arg2, string arg3) { }
 
-            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 339);
+            var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 342);
             Assert.True(result.Success);
             Assert.NotEmpty(result.XmlDocumentation);
             Assert.Contains("Fooes the specified arg1-3", result.XmlDocumentation);

@@ -4,6 +4,9 @@ using static DocPreview.PreviewWindowControl;
 
 namespace DocPreview.Test
 {
+    /// <summary>
+    /// TestBaseClass
+    /// </summary>
     public class TestBase
     {
         object ideLock = new object();

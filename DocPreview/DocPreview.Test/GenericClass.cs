@@ -298,9 +298,13 @@ namespace DocPreview.Test
             int foo3(int arg1, string arg2, string arg3) { }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="DocPreview.Test.TestBase"/>
         struct StructClass : StructBase, ITest
         {
+            /// <inheritdoc cref="DocPreview.Test.TestBase.TestBase()"/>
+            public StructClass()
+            {
+            }
             /// <summary>
             /// Fooes the specified arg1.
             /// </summary>
@@ -330,7 +334,6 @@ namespace DocPreview.Test
             }
         }
 
-        /// <inheritdoc cref="DocPreview.Test.TestBase.TestBase"/>
         struct StructSuperClass : StructClass, ITest
         {
             /// <inheritdoc cref="foo(int, string)" />

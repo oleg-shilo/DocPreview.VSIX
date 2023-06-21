@@ -92,7 +92,7 @@ namespace DocPreview
                     // + Multiple source files
                     // - Custom source name in the <inheritdoc...>
                     //   - limitations: no external assembly support;
-                    //   - overloaded signatures in cref should support the resolution priority
+                    //   + overloaded signatures in cref should support the resolution priority
                     // + Custom path in the <inheritdoc...>
                     // - Root level inheriting is not supported
                     // + Class Members vs Class
@@ -127,12 +127,16 @@ namespace DocPreview
                                 string srcName = crefName ?? detailedResult.MemberName.Split('.').Last();
 
                                 var queue = new Queue<string>();
+                                var processed = new List<string>();
 
                                 detailedResult.InheritanceChain.ToList().ForEach(queue.Enqueue);
 
                                 while (queue.Any())
                                 {
                                     var type = queue.Dequeue();
+
+                                    if (processed.Contains(type))
+                                        continue;
 
                                     var lookupName = (detailedResult.MemberDeclarationType == MemberDeclarationType.member) ?
                                                      $"{type}.{srcName}" :  // get XML doc from a base type member (e.g. Test.foo)
@@ -144,12 +148,12 @@ namespace DocPreview
 
                                     var lookupResult = lookupName.FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles);
 
-                                    inheritedDocXml = lookupResult.XmlDocumentation;
+                                    inheritedDocXml = lookupResult?.XmlDocumentation;
 
                                     if (inheritedDocXml.HasText())
                                         break;
 
-                                    lookupResult.InheritanceChain?.ToList().ForEach(queue.Enqueue);
+                                    lookupResult?.InheritanceChain?.ToList().ForEach(queue.Enqueue);
                                 }
                             }
 
