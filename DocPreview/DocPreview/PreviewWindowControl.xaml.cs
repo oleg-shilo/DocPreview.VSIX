@@ -249,21 +249,6 @@ namespace DocPreview
             }
         }
 
-        /// <summary>
-        /// dsafas
-        /// </summary>
-        struct StructBase3
-        {
-            /// <summary>
-            /// Fooes the specified arg1-3.
-            /// </summary>
-            /// <param name="arg1">The arg1.</param>
-            /// <param name="arg2">The arg2.</param>
-            /// <param name="arg3">The arg3.</param>
-            /// <returns></returns>
-            void foo3(int arg1, string arg2, string arg3) { }
-        }
-
         string GeneratePreviewForAll()
         {
             try

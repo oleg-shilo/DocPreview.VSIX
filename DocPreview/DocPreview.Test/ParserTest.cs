@@ -341,7 +341,7 @@ namespace DocPreview.Test
         {
             var result = Parser.FindAllDocumentation(code);
 
-            Assert.Equal(22, result.Count());
+            Assert.Equal(44, result.Count());
         }
     }
 }

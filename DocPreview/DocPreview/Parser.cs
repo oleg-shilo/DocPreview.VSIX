@@ -62,7 +62,7 @@ namespace DocPreview
                 {
                     if (docStart != -1)
                     {
-                        var info = FindMemberDocumentation(code, line, "C/C++");
+                        var info = FindMemberDocumentation(code, line, language);
                         if (info.Success)
                             result.Add(info);
                     }
@@ -83,108 +83,126 @@ namespace DocPreview
             Result result = FindMemberDocumentationSimple(code, caretLine, language);
 
             // process <inheritdoc ...> with Roslyn, which is only integrated with the extension for C#
-            if (result.Success && language == "CSharp")
+            if (result.Success)
             {
                 if (result.XmlDocumentation.Contains("<inheritdoc"))
                 {
-                    // TODO
-                    // <inheritdoc> spec: https://tunnelvisionlabs.github.io/SHFB/docs-master/SandcastleBuilder/html/79897974-ffc9-4b84-91a5-e50c66a0221d.htm
-                    // + Multiple source files
-                    // - Custom source name in the <inheritdoc...>
-                    //   - limitations: no external assembly support;
-                    //   + overloaded signatures in cref should support the resolution priority
-                    // + Custom path in the <inheritdoc...>
-                    // - Root level inheriting is not supported
-                    // + Class Members vs Class
-
-                    Result detailedResult = code.FindMemberTypeFromPosition(caretLine);
-
-                    var xmlDoc = detailedResult.XmlDocumentation.ParseAsMultirootXml();
-                    var newXmlDoc = "".ParseAsMultirootXml();
-
-                    foreach (var item in xmlDoc.Elements())
+                    if (language == "CSharp")
                     {
-                        if (item.Name.LocalName == "inheritdoc")
+                        // TODO
+                        // <inheritdoc> spec: https://tunnelvisionlabs.github.io/SHFB/docs-master/SandcastleBuilder/html/79897974-ffc9-4b84-91a5-e50c66a0221d.htm
+                        // + Multiple source files
+                        // - Custom source name in the <inheritdoc...>
+                        //   - limitations: no external assembly support;
+                        //   + overloaded signatures in cref should support the resolution priority
+                        // + Custom path in the <inheritdoc...>
+                        // - Root level inheriting is not supported
+                        // + Class Members vs Class
+
+                        Result detailedResult = code.FindMemberTypeFromPosition(caretLine);
+
+                        var xmlDoc = detailedResult.XmlDocumentation.ParseAsMultirootXml();
+                        var newXmlDoc = "".ParseAsMultirootXml();
+
+                        foreach (var item in xmlDoc.Elements())
                         {
-                            var crefName = item.Attribute("cref")?.Value;
-                            var selectPath = item.Attribute("select")?.Value;
-
-                            var allSourceFiles = Runtime.Ide.GetCodeBaseFiles();
-
-                            var possiblePrefixes = new List<string>();
-                            possiblePrefixes.AddRange(detailedResult.MemberName.GetParentNamespaces());
-                            possiblePrefixes.AddRange(detailedResult.MemberModuleUsings);
-                            possiblePrefixes.ForEach(x => Debug.WriteLine("   " + x));
-
-                            string inheritedDocXml = null;
-
-                            if (crefName?.Contains(".") == true) // explicit base type definition i.e. cref="Test.foo"
+                            if (item.Name.LocalName == "inheritdoc")
                             {
-                                inheritedDocXml = ($"{crefName}").FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles)?.XmlDocumentation;
+                                var crefName = item.Attribute("cref")?.Value;
+                                var selectPath = item.Attribute("select")?.Value;
+
+                                var allSourceFiles = Runtime.Ide.GetCodeBaseFiles();
+
+                                var possiblePrefixes = new List<string>();
+                                possiblePrefixes.AddRange(detailedResult.MemberName.GetParentNamespaces());
+                                possiblePrefixes.AddRange(detailedResult.MemberModuleUsings);
+                                possiblePrefixes.ForEach(x => Debug.WriteLine("   " + x));
+
+                                string inheritedDocXml = null;
+
+                                if (crefName?.Contains(".") == true) // explicit base type definition i.e. cref="Test.foo"
+                                {
+                                    inheritedDocXml = ($"{crefName}").FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles)?.XmlDocumentation;
+                                }
+                                else
+                                {
+                                    string srcName = crefName ?? detailedResult.MemberName.Split('.').Last();
+
+                                    var queue = new Queue<string>();
+                                    var processed = new List<string>();
+
+                                    detailedResult.InheritanceChain.ToList().ForEach(queue.Enqueue);
+
+                                    while (queue.Any())
+                                    {
+                                        var type = queue.Dequeue();
+
+                                        if (processed.Contains(type))
+                                            continue;
+
+                                        var lookupName = (detailedResult.MemberDeclarationType == MemberDeclarationType.member) ?
+                                                         $"{type}.{srcName}" :  // get XML doc from a base type member (e.g. Test.foo)
+                                                         type;                  // get XML doc from a base type definition
+
+                                        Debug.WriteLine("--------------");
+                                        Debug.WriteLine("member: " + lookupName);
+                                        Debug.WriteLine("prefixes:");
+
+                                        var lookupResult = lookupName.FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles);
+
+                                        inheritedDocXml = lookupResult?.XmlDocumentation;
+
+                                        if (inheritedDocXml.HasText())
+                                            break;
+
+                                        lookupResult?.InheritanceChain?.ToList().ForEach(queue.Enqueue);
+                                    }
+                                }
+
+                                if (!inheritedDocXml.HasText())
+                                    inheritedDocXml = $"<summary>{new XText(result.XmlDocumentation)}</summary>";
+
+                                var inheritedDoc = inheritedDocXml.ParseAsMultirootXml();
+
+                                if (selectPath.HasText())
+                                {
+                                    var selectedXml = "";
+
+                                    using (var sr = new StringReader($"<root>{inheritedDocXml}</root>"))
+                                    {
+                                        var nav = new XPathDocument(sr).CreateNavigator();
+                                        nav.MoveToFirstChild();
+                                        var path_result = nav.Evaluate(selectPath);
+                                        foreach (XPathNavigator n in nav.Select(selectPath))
+                                            selectedXml += n.OuterXml;
+                                    }
+                                    inheritedDoc = selectedXml.ParseAsMultirootXml();
+                                }
+
+                                foreach (var i_item in inheritedDoc.Elements())
+                                    newXmlDoc.Add(i_item);
                             }
                             else
-                            {
-                                string srcName = crefName ?? detailedResult.MemberName.Split('.').Last();
-
-                                var queue = new Queue<string>();
-                                var processed = new List<string>();
-
-                                detailedResult.InheritanceChain.ToList().ForEach(queue.Enqueue);
-
-                                while (queue.Any())
-                                {
-                                    var type = queue.Dequeue();
-
-                                    if (processed.Contains(type))
-                                        continue;
-
-                                    var lookupName = (detailedResult.MemberDeclarationType == MemberDeclarationType.member) ?
-                                                     $"{type}.{srcName}" :  // get XML doc from a base type member (e.g. Test.foo)
-                                                     type;                  // get XML doc from a base type definition
-
-                                    Debug.WriteLine("--------------");
-                                    Debug.WriteLine("member: " + lookupName);
-                                    Debug.WriteLine("prefixes:");
-
-                                    var lookupResult = lookupName.FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles);
-
-                                    inheritedDocXml = lookupResult?.XmlDocumentation;
-
-                                    if (inheritedDocXml.HasText())
-                                        break;
-
-                                    lookupResult?.InheritanceChain?.ToList().ForEach(queue.Enqueue);
-                                }
-                            }
-
-                            if (!inheritedDocXml.HasText())
-                                inheritedDocXml = $"<summary>{new XText(result.XmlDocumentation)}</summary>";
-
-                            var inheritedDoc = inheritedDocXml.ParseAsMultirootXml();
-
-                            if (selectPath.HasText())
-                            {
-                                var selectedXml = "";
-
-                                using (var sr = new StringReader($"<root>{inheritedDocXml}</root>"))
-                                {
-                                    var nav = new XPathDocument(sr).CreateNavigator();
-                                    nav.MoveToFirstChild();
-                                    var path_result = nav.Evaluate(selectPath);
-                                    foreach (XPathNavigator n in nav.Select(selectPath))
-                                        selectedXml += n.OuterXml;
-                                }
-                                inheritedDoc = selectedXml.ParseAsMultirootXml();
-                            }
-
-                            foreach (var i_item in inheritedDoc.Elements())
-                                newXmlDoc.Add(i_item);
+                                newXmlDoc.Add(item);
                         }
-                        else
-                            newXmlDoc.Add(item);
-                    }
 
-                    result.XmlDocumentation = newXmlDoc.ToString().Replace("<data>", "").Replace("</data>", "").Trim();
+                        result.XmlDocumentation = newXmlDoc.ToString().Replace("<data>", "").Replace("</data>", "").Trim();
+                    }
+                    else
+                    {
+                        var xmlDoc = result.XmlDocumentation.ParseAsMultirootXml();
+                        var newXmlDoc = "".ParseAsMultirootXml();
+
+                        foreach (XElement element in xmlDoc.Elements())
+                        {
+                            if (element.Name.LocalName == "inheritdoc")
+                                newXmlDoc.Add(new XText(element.ToString()));
+                            else
+
+                                newXmlDoc.Add(element);
+                        }
+                        result.XmlDocumentation = newXmlDoc.ToString().Replace("<data>", "<summary>").Replace("</data>", "</summary>").Trim();
+                    }
                 }
             }
             return result;

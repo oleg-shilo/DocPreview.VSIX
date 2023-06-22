@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DocPreview.Test
 {
     /// <summary>
-    /// Class <b>ttt</b> documentation
+    /// Class documentation
     /// </summary>
     class GenericClass
     {
