@@ -355,3 +355,23 @@ namespace DocPreview.Test
             delegate int Deltest();
         }
     }
+
+    /// <summary>
+    /// TestBase4 class
+    /// </summary>
+    class TestBase4
+    {
+        /// <summary>
+        /// Fooes the specified arg1.
+        /// </summary>
+        /// <param name="arg1">The arg1.</param>
+        /// <returns></returns>
+        int foo(int arg1) { }
+    }
+
+    /// <inheritdoc />
+    class Test4 : TestBase4
+    {
+        int foo(int arg1) { }
+    }
+}

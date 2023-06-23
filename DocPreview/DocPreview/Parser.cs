@@ -80,7 +80,13 @@ namespace DocPreview
 
         public static Result FindMemberDocumentation(string code, int caretLine, string language = "CSharp")
         {
-            Result result = FindMemberDocumentationSimple(code, caretLine, language);
+            // !!!!!
+            // if this class its to be used for the immediate resolving the documentation from the caret without
+            // FindMemberDocumentationSimple then locating XML documentation needs to be refined:
+            // Thus `vo|id foo(int a, string b)` locates XML correctly, but `void foo(int a, |string b)` picks the XML
+            // from the method below.
+
+            Result result = FindMemberDocumentationSimple(code, ref caretLine, language);
 
             // process <inheritdoc ...> with Roslyn, which is only integrated with the extension for C#
             if (result.Success)
@@ -91,13 +97,9 @@ namespace DocPreview
                     {
                         // TODO
                         // <inheritdoc> spec: https://tunnelvisionlabs.github.io/SHFB/docs-master/SandcastleBuilder/html/79897974-ffc9-4b84-91a5-e50c66a0221d.htm
-                        // + Multiple source files
-                        // - Custom source name in the <inheritdoc...>
-                        //   - limitations: no external assembly support;
-                        //   + overloaded signatures in cref should support the resolution priority
-                        // + Custom path in the <inheritdoc...>
+                        // - limitations: no external assembly support;
                         // - Root level inheriting is not supported
-                        // + Class Members vs Class
+                        // - No support for non-C# code
 
                         Result detailedResult = code.FindMemberTypeFromPosition(caretLine);
 
@@ -208,7 +210,7 @@ namespace DocPreview
             return result;
         }
 
-        private static Result FindMemberDocumentationSimple(string code, int caretLine, string language)
+        private static Result FindMemberDocumentationSimple(string code, ref int caretLine, string language)
         {
             string[] statementDelimiters = new string[] { ";", "{" };
 
@@ -223,8 +225,15 @@ namespace DocPreview
             if (lines.Any() && lines.Last() == null)
                 lines = lines.Take(lines.Count() - 1).ToArray();
 
-            if (lines.Length > fromLine && lines[fromLine].Trim().StartsWith(xmlDocPreffix)) // it is XML doc comment line
+            Func<int, bool> isXmlDocLine = (lineNum) => lines.Length > lineNum && lines[lineNum].Trim().StartsWith(xmlDocPreffix);
+
+            if (fromLine > 0 && !isXmlDocLine(fromLine) && isXmlDocLine(fromLine - 1))
+                fromLine--; // member line and one line above is the documentation section
+
+            if (isXmlDocLine(fromLine))
             {
+                caretLine = fromLine + 1;
+
                 result.MemberTitle = "Member";
                 result.MemberDefinition = "[some member]";
 
