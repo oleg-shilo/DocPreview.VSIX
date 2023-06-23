@@ -137,7 +137,7 @@ namespace DocPreview.Test
             var result = Parser.FindMemberDocumentation(base.Ide.GenericClass_code, 372);
             Assert.True(result.Success);
             Assert.NotEmpty(result.XmlDocumentation);
-            Assert.Contains("Fooes the specified arg1-3", result.XmlDocumentation);
+            Assert.Contains("TestBase4 class", result.XmlDocumentation);
         }
 
         [Fact]
@@ -369,7 +369,7 @@ namespace DocPreview.Test
         {
             var result = Parser.FindAllDocumentation(code);
 
-            Assert.Equal(44, result.Count());
+            Assert.Equal(47, result.Count());
         }
     }
 }
