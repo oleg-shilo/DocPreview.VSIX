@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DocPreview.Test
 {
     /// <summary>
-    /// Class <b>ttt</b> documentation
+    /// Class documentation
     /// </summary>
     class GenericClass
     {
@@ -212,50 +212,166 @@ namespace DocPreview.Test
         value3,
     }
 
-    class TestAgain
+    class ParentClass
     {
         /// <summary>
-        /// <b>Evaluate</b> the expression associated with the target property specified.
+        /// Test class definition
         /// </summary>
-        /// <returns>
-        /// A <see cref="JValue"/> containing the value of the expression evaluated. The following rules apply to the
-        /// return values:
-        /// <list type="bullet">
-        /// <item>
-        /// If the target property is found and the expression evaluates to a valid primitive value, then a JValue
-        /// is returned that includes the result of the expression.
-        /// </item>
-        /// <item><description>
-        /// If the target property is found <see cref="member">Link text</see> and evaluates to <b>null</b> then a JValue containing null is returned.
-        /// </description>
-        /// </item>
-        /// <item>
-        /// If the target property is not found, then null is returned.
-        /// </item>
-        /// <item>
-        ///  <term><b>Assembly</b></term>
-        ///  <description>The library or executable built from a compilation.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        int foo { }
+        class Test
+        {
+            /// <summary>
+            /// FOO <b>Evaluate</b> the expression associated with the target property specified.
+            /// </summary>
+            /// <returns>
+            /// A <see cref="JValue"/> containing the value of the expression evaluated. The following rules apply to the
+            /// return values:
+            /// <list type="bullet">
+            /// <item>
+            /// If the target property is found and the expression evaluates to a valid primitive value, then a JValue
+            /// is returned that includes the result of the expression.
+            /// </item>
+            /// <item><description>
+            /// If the target property is found <see cref="member">Link text</see> and evaluates to <b>null</b> then a JValue containing null is returned.
+            /// </description>
+            /// </item>
+            /// <item>
+            /// If the target property is not found, then null is returned.
+            /// </item>
+            /// <item>
+            ///  <term><b>Assembly</b></term>
+            ///  <description>The library or executable built from a compilation.</description>
+            /// </item>
+            /// </list>
+            /// </returns>
+            /// <code></code>
+            int foo { }
 
+            /// <summary>
+            /// FOO2 <list type="number">
+            /// <listheader>
+            ///     <term>term</term>
+            ///     <description>description</description>
+            /// </listheader>
+            /// <item>
+            ///     <term>Assembly</term>
+            ///     <description>The library or executable built from a compilation.
+            ///     </description>
+            /// </item>
+            /// </list>
+            /// </summary>
+            /// <value>
+            /// The foo2.
+            /// </value>
+            int foo2 { }
+        }
+
+        /// <inheritdoc />
+        class TestAgain : Test, ITest
+        {
+            /// <inheritdoc />
+            int foo { }
+
+            /// <inheritdoc />
+            /// <remarks>This is a dummy class and always returns null.</remarks>
+            int foo2 { }
+
+            /// <inheritdoc cref="DocPreview.Test.ParentClass.Test.foo2"/>
+            /// <remarks>This is a dummy class and always returns null.</remarks>
+            int foo3 { }
+
+            /// <inheritdoc cref="Object.ToString" />
+            public override string ToString()
+            {
+                return base.ToString();
+            }
+        }
+
+        struct StructBase
+        {
+            /// <summary>
+            /// Fooes the specified arg1-3.
+            /// </summary>
+            /// <param name="arg1">The arg1.</param>
+            /// <param name="arg2">The arg2.</param>
+            /// <param name="arg3">The arg3.</param>
+            /// <returns></returns>
+            int foo3(int arg1, string arg2, string arg3) { }
+        }
+
+        /// <inheritdoc cref="DocPreview.Test.TestBase"/>
+        struct StructClass : StructBase, ITest
+        {
+            /// <inheritdoc cref="DocPreview.Test.TestBase.TestBase()"/>
+            public StructClass()
+            {
+            }
+            /// <summary>
+            /// Fooes the specified arg1.
+            /// </summary>
+            /// <param name="arg1">The arg1.</param>
+            /// <returns></returns>
+            int foo(int arg1) { }
+
+            /// <summary>
+            /// Fooes the specified arg1, arg2.
+            /// </summary>
+            /// <param name="arg1">The arg1.</param>
+            /// <param name="arg2">The arg2.</param>
+            /// <returns></returns>
+            int foo(int arg1, string arg2) { }
+
+            /// <summary>
+            /// This overloaded method does something
+            /// </summary>
+            /// <param name="p1">The string parameter p1</param>
+            /// <overloads>
+            /// <summary>There are three overloads for this method.</summary>
+            /// <remarks>These remarks are from the overloads tag on the
+            /// first version.</remarks>
+            /// </overloads>
+            public void OverloadedMethod(string p1)
+            {
+            }
+        }
+
+        struct StructSuperClass : StructClass, ITest
+        {
+            /// <inheritdoc cref="foo(int, string)" />
+            int foo(int arg1, string arg2) { }
+
+            /// <inheritdoc />
+            int foo3(int arg1, string arg2, string arg3) { }
+
+            /// <inheritdoc />
+            int foo(int arg1) { }
+
+            /// <inheritdoc cref="OverloadedMethod(string)"
+            ///     select="param|overloads/*" />
+            /// <param name="x">An integer parameter</param>
+            public void OverloadedMethod(string p1, int x)
+            {
+            }
+
+            delegate int Deltest();
+        }
+    }
+
+    /// <summary>
+    /// TestBase4 class
+    /// </summary>
+    class TestBase4
+    {
         /// <summary>
-        /// <list type="number">
-        /// <listheader>
-        ///     <term>term</term>
-        ///     <description>description</description>
-        /// </listheader>
-        /// <item>
-        ///     <term>Assembly</term>
-        ///     <description>The library or executable built from a compilation.
-        ///     </description>
-        /// </item>
-        /// </list>
+        /// Fooes the specified arg1.
         /// </summary>
-        /// <value>
-        /// The foo2.
-        /// </value>
-        int foo2 { }
+        /// <param name="arg1">The arg1.</param>
+        /// <returns></returns>
+        int foo(int arg1) { }
+    }
+
+    /// <inheritdoc />
+    class Test4 : TestBase4
+    {
+        int foo(int arg1) { }
     }
 }

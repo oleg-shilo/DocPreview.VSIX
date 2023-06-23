@@ -45,6 +45,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CodeAnalysisExtensions.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="PreviewWindow.cs" />
@@ -56,6 +57,11 @@
     <Compile Include="DocPreviewPackage.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="Resources\Resource1.Designer.cs" />
+    <Compile Include="Resources\ResourceAssemblies.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResourceAssemblies.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="source.extension.vsixmanifest">
@@ -63,12 +69,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.NRefactory">
-      <HintPath>lib\ICSharpCode.NRefactory.dll</HintPath>
-    </Reference>
-    <Reference Include="ICSharpCode.NRefactory.CSharp">
-      <HintPath>lib\ICSharpCode.NRefactory.CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -79,13 +79,22 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.31902.203" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.5233" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
+      <Version>4.7.0-1.final</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.6.36389" ExcludeAssets="runtime">
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.6.2164">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="System.Text.Json">
-      <Version>6.0.1</Version>
+      <Version>8.0.0-preview.4.23259.5</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -95,6 +104,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <None Include="lib\Microsoft.CodeAnalysis.CSharp.dll" />
+    <None Include="lib\Microsoft.CodeAnalysis.dll" />
+    <None Include="lib\System.Collections.Immutable.dll" />
+    <None Include="lib\System.Runtime.CompilerServices.Unsafe.dll" />
     <Content Include="licence.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -118,6 +131,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Resource1.resx" />
+    <EmbeddedResource Include="Resources\ResourceAssemblies.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResourceAssemblies.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DocPrevGen\DocPrevGen.csproj">

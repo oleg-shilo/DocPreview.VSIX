@@ -1,6 +1,9 @@
-﻿using EnvDTE80;
+﻿using EnvDTE;
+using EnvDTE80;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -12,6 +15,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
+using static DocPreview.PreviewWindowControl;
 
 namespace DocPreview
 {
@@ -126,7 +130,7 @@ namespace DocPreview
         string lastPreviewFileName = null;
         string lastPreviewAllText = null;
 
-        void AutoRefreshPreview()
+        public void AutoRefreshPreview()
         {
             if (AutoRefresh.IsChecked.Value)
                 RefreshPreview(false);
@@ -172,7 +176,22 @@ namespace DocPreview
             }
         }
 
-        void RefreshPreview(bool force = false)
+        public interface IIdeServices
+        {
+            bool IsCurrentViewValid { get; }
+
+            string GetCurrentViewLanguage();
+
+            string GetCurrentViewText();
+
+            int? GetCurrentCaretLine();
+
+            string GetCurrentFileName();
+
+            string[] GetCodeBaseFiles();
+        }
+
+        public void RefreshPreview(bool force = false)
         {
             try
             {
@@ -184,24 +203,13 @@ namespace DocPreview
                 if (force)
                     protectDisplayedProductInfo = false;
 
-                IWpfTextView textView = Global.GetTextView();
+                string language = Runtime.Ide.GetCurrentViewLanguage();
 
-                string language = textView.TextBuffer.ContentType.TypeName;
-
-                if (textView != null && (language == "CSharp" || language == "F#" || language == "C/C++" || language == "Basic"))
+                if (Runtime.Ide.IsCurrentViewValid && (language == "CSharp" || language == "F#" || language == "C/C++" || language == "Basic"))
                 {
-                    ITextSnapshot snapshot = textView.TextSnapshot;
-
-                    if (snapshot != snapshot.TextBuffer.CurrentSnapshot)
-                        return;
-
-                    if (!textView.Selection.IsEmpty)
-                        return;
-
-                    DTE2 dte = Global.GetDTE2();
-                    string fileName = dte.ActiveDocument.FullName;
-                    int caretLineNumber = snapshot.GetLineNumberFromPosition(textView.Caret.Position.BufferPosition);
-                    string code = snapshot.GetText();
+                    string fileName = Runtime.Ide.GetCurrentFileName();
+                    int caretLineNumber = Runtime.Ide.GetCurrentCaretLine().Value;
+                    string code = Runtime.Ide.GetCurrentViewText();
 
                     if (force || (fileName != lastPreviewFileName || caretLineNumber != lastPreviewLineNumber || code != lastPreviewAllText))
                     {
@@ -311,7 +319,7 @@ namespace DocPreview
                 initialized = true;
                 try
                 {
-                    var runningProcs = Process.GetProcesses().Select(x => x.Id);
+                    var runningProcs = System.Diagnostics.Process.GetProcesses().Select(x => x.Id);
 
                     var oldDirs = Directory.GetDirectories(rootDir, "vs.*")
                                            .Select(x => new
@@ -413,7 +421,7 @@ namespace DocPreview
         {
             try
             {
-                Process.Start("explorer.exe", $"/select, \"{config.CustomCss}\"");
+                System.Diagnostics.Process.Start("explorer.exe", $"/select, \"{config.CustomCss}\"");
             }
             catch { }
         }
@@ -489,18 +497,5 @@ namespace DocPreview
         }
 
         static string configFile = Path.Combine(XmlDocumentation.DocPreview.AppDataDir, "config.json");
-    }
-
-    static class Json
-    {
-        public static string ToJson(this object obj)
-        {
-            return JsonSerializer.Serialize(obj);
-        }
-
-        public static T FromJson<T>(this string json)
-        {
-            return JsonSerializer.Deserialize<T>(json);
-        }
     }
 }

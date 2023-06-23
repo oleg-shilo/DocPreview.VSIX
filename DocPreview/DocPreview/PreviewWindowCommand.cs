@@ -1,10 +1,13 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 using System;
 using System.ComponentModel.Design;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using static DocPreview.PreviewWindowControl;
 using Task = System.Threading.Tasks.Task;
 
 namespace DocPreview
@@ -77,6 +80,8 @@ namespace DocPreview
 
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             Instance = new PreviewWindowCommand(package, commandService);
+
+            Runtime.Ide = new IdeServices();
         }
 
         /// <summary>
@@ -109,6 +114,69 @@ namespace DocPreview
                                             OLEMSGICON.OLEMSGICON_INFO,
                                             OLEMSGBUTTON.OLEMSGBUTTON_OK,
                                             OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+        }
+    }
+
+    class IdeServices : IIdeServices
+    {
+        public bool IsCurrentViewValid
+        {
+            get
+            {
+                IWpfTextView textView = Global.GetTextView();
+                ITextSnapshot snapshot = textView?.TextSnapshot;
+
+                if (snapshot == null || snapshot != snapshot.TextBuffer.CurrentSnapshot)
+                    return false;
+
+                if (textView?.Selection.IsEmpty != true)
+                    return false;
+
+                return true;
+            }
+        }
+
+        public int? GetCurrentCaretLine()
+        {
+            IWpfTextView textView = Global.GetTextView();
+            if (textView != null)
+            {
+                ITextSnapshot snapshot = textView.TextSnapshot;
+                return snapshot.GetLineNumberFromPosition(textView.Caret.Position.BufferPosition);
+            }
+            return null;
+        }
+
+        public string GetCurrentViewLanguage()
+        {
+            IWpfTextView textView = Global.GetTextView();
+            return textView.TextBuffer.ContentType.TypeName;
+        }
+
+        public string GetCurrentViewText()
+        {
+            IWpfTextView textView = Global.GetTextView();
+            if (textView != null)
+            {
+                ITextSnapshot snapshot = textView.TextSnapshot;
+                int caretLineNumber = snapshot.GetLineNumberFromPosition(textView.Caret.Position.BufferPosition);
+                return snapshot.GetText();
+            }
+            return null;
+        }
+
+        public string GetCurrentFileName() => Global.GetDTE2().ActiveDocument.FullName;
+
+        public string[] GetCodeBaseFiles()
+        {
+            // var projects = Global.GetSolutionProjects();
+
+            // var query = from p in projects
+            //             where p.ContainsFile(containedFile)
+            //             select p;
+
+            // return query.ToArray();
+            return GetCurrentFileName().ToSingleItemArray();
         }
     }
 }

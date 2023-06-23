@@ -1,1 +1,1 @@
-- Added support for persisting zoom level
+- Issue #17:  Add support for the <inheritdoc> tag 

@@ -1,13 +1,30 @@
+// using ICSharpCode.NRefactory.CSharp;
+// using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+// using Microsoft.CodeAnalysis;
+
+// using Microsoft.CodeAnalysis.CSharp;
+
+// using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+// using Microsoft.CodeAnalysis.CSharp;
+// using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
-using ICSharpCode.NRefactory.CSharp;
+using System.Xml.Linq;
+using System.Xml.XPath;
+using ms_CodeAnalysis = Microsoft.CodeAnalysis;
+
+using ms_Syntax = Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DocPreview
 {
-    public static class Parser
+    public static partial class Parser
     {
         public class Result
         {
@@ -15,28 +32,18 @@ namespace DocPreview
             public string MemberTitle;
             public string MemberDefinition; //signature
             public string XmlDocumentation;
-        }
-
-        static bool IsDefaultUsingsStyle(SyntaxTree syntaxTree)
-        {
-            var firstNamespace = syntaxTree.Children.DeepAll(x => x is NamespaceDeclaration)
-                                                    .Cast<NamespaceDeclaration>()
-                                                    .FirstOrDefault();
-
-            if (firstNamespace != null)
-            {
-                return !syntaxTree.Children.DeepAll(x => x is UsingDeclaration)
-                                           .Where(x => x.StartLocation.Line > firstNamespace.StartLocation.Line)
-                                           .Any();
-            }
-            return true;
+            public string MemberName;
+            public MemberDeclarationType MemberDeclarationType;
+            public string MemberBaseType;
+            public string[] InheritanceChain;
+            public string[] MemberModuleUsings;
         }
 
         public static IEnumerable<Result> FindAllDocumentation(string code, string language = "CSharp")
         {
             var result = new List<Result>();
 
-            string[] lines = code.Lines().Where(x => x != null).ToArray();
+            string[] lines = code.GetLines().Where(x => x != null).ToArray();
 
             int docStart = -1;
 
@@ -55,7 +62,7 @@ namespace DocPreview
                 {
                     if (docStart != -1)
                     {
-                        var info = FindMemberDocumentation(code, line, "C/C++");
+                        var info = FindMemberDocumentation(code, line, language);
                         if (info.Success)
                             result.Add(info);
                     }
@@ -73,32 +80,138 @@ namespace DocPreview
 
         public static Result FindMemberDocumentation(string code, int caretLine, string language = "CSharp")
         {
-            /*
-            C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Extensions\Xamarin\Xamarin\4.0.0.1689
+            // !!!!!
+            // if this class its to be used for the immediate resolving the documentation from the caret without
+            // FindMemberDocumentationSimple then locating XML documentation needs to be refined:
+            // Thus `vo|id foo(int a, string b)` locates XML correctly, but `void foo(int a, |string b)` picks the XML
+            // from the method below.
 
-            Quite shockingly Xamarin VS plugin is using ICSharpCode.NRefactory.dll - AssemblyFileVersion("5.5.1")
-            While this plugin relies on NuGet assembly ICSharpCode.NRefactory.dll - AssemblyFileVersion("5.2.0").
-            And the both assemblies are built as "Assembly ICSharpCode.NRefactory, Version 5.0.0.0"
-            SHOCKING!!!!
-            The assemblies are clearly different (file size and functionality wise) despite being both marked as the same version.
+            Result result = FindMemberDocumentationSimple(code, ref caretLine, language);
 
-            CLR cannot distinguish them and assembly probing gets so screwed that UnitTesting loads
-            one assembly file and VS (runtime) another one.
+            // process <inheritdoc ...> with Roslyn, which is only integrated with the extension for C#
+            if (result.Success)
+            {
+                if (result.XmlDocumentation.Contains("<inheritdoc"))
+                {
+                    if (language == "CSharp")
+                    {
+                        // TODO
+                        // <inheritdoc> spec: https://tunnelvisionlabs.github.io/SHFB/docs-master/SandcastleBuilder/html/79897974-ffc9-4b84-91a5-e50c66a0221d.htm
+                        // - limitations: no external assembly support;
+                        // - Root level inheriting is not supported
+                        // - No support for non-C# code
 
-            Xamarin should never ever distribute a conflicting assembly.
+                        Result detailedResult = code.FindMemberTypeFromPosition(caretLine);
 
-            The outcome is - using NRefactory v5.0.0.0 is too risky as it's not clear when and where the asm probing
-            will fail again. And also there is no warranty that Xamarin wouldn't release yet another edition of
-            ICSharpCode.NRefactory v5.0.0.0.
+                        var xmlDoc = detailedResult.XmlDocumentation.ParseAsMultirootXml();
+                        var newXmlDoc = "".ParseAsMultirootXml();
 
-            Forcing (somehow) DocPreview to be loaded before Xamarin will fix the problem but it will
-            then screw Xamarin plugin.
+                        foreach (var item in xmlDoc.Elements())
+                        {
+                            if (item.Name.LocalName == "inheritdoc")
+                            {
+                                var crefName = item.Attribute("cref")?.Value;
+                                var selectPath = item.Attribute("select")?.Value;
 
-            I had no choice but to implement my own "poor-man" parser.
+                                var allSourceFiles = Runtime.Ide.GetCodeBaseFiles();
 
-            */
-            //FindMemberDocumentationNRefactoryNew(code, caretLine);
+                                var possiblePrefixes = new List<string>();
+                                possiblePrefixes.AddRange(detailedResult.MemberName.GetParentNamespaces());
+                                possiblePrefixes.AddRange(detailedResult.MemberModuleUsings);
+                                possiblePrefixes.ForEach(x => Debug.WriteLine("   " + x));
 
+                                string inheritedDocXml = null;
+
+                                if (crefName?.Contains(".") == true) // explicit base type definition i.e. cref="Test.foo"
+                                {
+                                    inheritedDocXml = ($"{crefName}").FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles)?.XmlDocumentation;
+                                }
+                                else
+                                {
+                                    string srcName = crefName ?? detailedResult.MemberName.Split('.').Last();
+
+                                    var queue = new Queue<string>();
+                                    var processed = new List<string>();
+
+                                    detailedResult.InheritanceChain.ToList().ForEach(queue.Enqueue);
+
+                                    while (queue.Any())
+                                    {
+                                        var type = queue.Dequeue();
+
+                                        if (processed.Contains(type))
+                                            continue;
+
+                                        var lookupName = (detailedResult.MemberDeclarationType == MemberDeclarationType.member) ?
+                                                         $"{type}.{srcName}" :  // get XML doc from a base type member (e.g. Test.foo)
+                                                         type;                  // get XML doc from a base type definition
+
+                                        Debug.WriteLine("--------------");
+                                        Debug.WriteLine("member: " + lookupName);
+                                        Debug.WriteLine("prefixes:");
+
+                                        var lookupResult = lookupName.FindMemberDocumentationForType(possiblePrefixes.ToArray(), allSourceFiles);
+
+                                        inheritedDocXml = lookupResult?.XmlDocumentation;
+
+                                        if (inheritedDocXml.HasText())
+                                            break;
+
+                                        lookupResult?.InheritanceChain?.ToList().ForEach(queue.Enqueue);
+                                    }
+                                }
+
+                                if (!inheritedDocXml.HasText())
+                                    inheritedDocXml = $"<summary>{new XText(result.XmlDocumentation)}</summary>";
+
+                                var inheritedDoc = inheritedDocXml.ParseAsMultirootXml();
+
+                                if (selectPath.HasText())
+                                {
+                                    var selectedXml = "";
+
+                                    using (var sr = new StringReader($"<root>{inheritedDocXml}</root>"))
+                                    {
+                                        var nav = new XPathDocument(sr).CreateNavigator();
+                                        nav.MoveToFirstChild();
+                                        var path_result = nav.Evaluate(selectPath);
+                                        foreach (XPathNavigator n in nav.Select(selectPath))
+                                            selectedXml += n.OuterXml;
+                                    }
+                                    inheritedDoc = selectedXml.ParseAsMultirootXml();
+                                }
+
+                                foreach (var i_item in inheritedDoc.Elements())
+                                    newXmlDoc.Add(i_item);
+                            }
+                            else
+                                newXmlDoc.Add(item);
+                        }
+
+                        result.XmlDocumentation = newXmlDoc.ToString().Replace("<data>", "").Replace("</data>", "").Trim();
+                    }
+                    else
+                    {
+                        var xmlDoc = result.XmlDocumentation.ParseAsMultirootXml();
+                        var newXmlDoc = "".ParseAsMultirootXml();
+
+                        foreach (XElement element in xmlDoc.Elements())
+                        {
+                            if (element.Name.LocalName == "inheritdoc")
+                                newXmlDoc.Add(new XText(element.ToString()));
+                            else
+
+                                newXmlDoc.Add(element);
+                        }
+                        result.XmlDocumentation = newXmlDoc.ToString().Replace("<data>", "<summary>").Replace("</data>", "</summary>").Trim();
+                    }
+                }
+            }
+            return result;
+        }
+
+        private static Result FindMemberDocumentationSimple(string code, ref int caretLine, string language)
+        {
             string[] statementDelimiters = new string[] { ";", "{" };
 
             string xmlDocPreffix = GetXmlDocPrefix(language);
@@ -108,12 +221,19 @@ namespace DocPreview
             int fromLine = caretLine - 1;
 
             //poor man C# syntax parser. Too bad NRefactory conflicts with Xamarin
-            string[] lines = code.Lines().ToArray();
+            string[] lines = code.GetLines().ToArray();
             if (lines.Any() && lines.Last() == null)
                 lines = lines.Take(lines.Count() - 1).ToArray();
 
-            if (lines.Length > fromLine && lines[fromLine].Trim().StartsWith(xmlDocPreffix)) // it is XML doc comment line
+            Func<int, bool> isXmlDocLine = (lineNum) => lines.Length > lineNum && lines[lineNum].Trim().StartsWith(xmlDocPreffix);
+
+            if (fromLine > 0 && !isXmlDocLine(fromLine) && isXmlDocLine(fromLine - 1))
+                fromLine--; // member line and one line above is the documentation section
+
+            if (isXmlDocLine(fromLine))
             {
+                caretLine = fromLine + 1;
+
                 result.MemberTitle = "Member";
                 result.MemberDefinition = "[some member]";
 
@@ -210,117 +330,6 @@ namespace DocPreview
                 }
 
                 result.XmlDocumentation = content.ToString().Trim();
-                result.Success = true;
-            }
-            return result;
-        }
-
-        public static Result FindMemberDocumentationNRefactoryNew(string code, int fromLine)
-        {
-            var result = new Result();
-
-            var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
-
-            var comment = syntaxTree.Children
-                                    .DeepAll(x => x is Comment)
-                                    .Cast<Comment>()
-                                    .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
-                                    .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
-                                    .OrderBy(x => x.Size)
-                                    .FirstOrDefault();
-
-            if (comment != null)
-            {
-                var content = new StringBuilder();
-                content.AppendLine(comment.Node.Content);
-
-                var parent = comment.Node.Parent;
-                while (parent != null && (parent.NodeType != NodeType.Member))
-                {
-                    parent = parent.Parent;
-                }
-
-                //parent is the declaration with the comments included shocking runtime difference
-                //comparing to the unit test environment
-                return null;
-                ///////////////////////////////////
-                var prevComment = comment.Node.PrevSibling as Comment;
-                while (prevComment != null && prevComment.CommentType == CommentType.Documentation)
-                {
-                    content.PrependLine(prevComment.Content);
-                    prevComment = prevComment.PrevSibling as Comment;
-                }
-                result.XmlDocumentation = content.ToString();
-
-                var nextNode = comment.Node.NextSibling;
-                while (nextNode != null && (nextNode.NodeType != NodeType.Member && nextNode.NodeType != NodeType.TypeDeclaration))
-                {
-                    nextNode = nextNode.NextSibling;
-                }
-
-                if (nextNode != null && (nextNode.NodeType == NodeType.Member || nextNode.NodeType == NodeType.TypeDeclaration || nextNode.NodeType == NodeType.TypeDeclaration))
-                {
-                    //<membertype>:<signature>
-                    var signatureInfo = (nextNode.GetMemberSignature(code) ?? ":").Split(':');
-                    result.MemberTitle = signatureInfo[0];
-                    result.MemberDefinition = signatureInfo[1];
-                }
-                else
-                {
-                    result.MemberTitle = "Member";
-                    result.MemberDefinition = "[some member]";
-                }
-                result.Success = true;
-            }
-
-            return result;
-        }
-
-        public static Result FindMemberDocumentationNRefactory(string code, int fromLine)
-        {
-            var result = new Result();
-
-            var syntaxTree = new CSharpParser().Parse(code, "demo.cs");
-
-            var comment = syntaxTree.Children
-                                    .DeepAll(x => x is Comment)
-                                    .Cast<Comment>()
-                                    .Where(c => c.CommentType == CommentType.Documentation && c.StartLocation.Line <= fromLine && c.EndLocation.Line >= fromLine) //inside of the node
-                                    .Select(t => new { Node = t, Size = t.EndLocation.Line - t.StartLocation.Line })
-                                    .OrderBy(x => x.Size)
-                                    .FirstOrDefault();
-
-            if (comment != null)
-            {
-                var content = new StringBuilder();
-                content.AppendLine(comment.Node.Content);
-
-                var prevComment = comment.Node.PrevSibling as Comment;
-                while (prevComment != null && prevComment.CommentType == CommentType.Documentation)
-                {
-                    content.PrependLine(prevComment.Content);
-                    prevComment = prevComment.PrevSibling as Comment;
-                }
-                result.XmlDocumentation = content.ToString();
-
-                var nextNode = comment.Node.NextSibling;
-                while (nextNode != null && (nextNode.NodeType != NodeType.Member && nextNode.NodeType != NodeType.TypeDeclaration))
-                {
-                    nextNode = nextNode.NextSibling;
-                }
-
-                if (nextNode != null && (nextNode.NodeType == NodeType.Member || nextNode.NodeType == NodeType.TypeDeclaration || nextNode.NodeType == NodeType.TypeDeclaration))
-                {
-                    //<membertype>:<signature>
-                    var signatureInfo = (nextNode.GetMemberSignature(code) ?? ":").Split(':');
-                    result.MemberTitle = signatureInfo[0];
-                    result.MemberDefinition = signatureInfo[1];
-                }
-                else
-                {
-                    result.MemberTitle = "Member";
-                    result.MemberDefinition = "[some member]";
-                }
                 result.Success = true;
             }
 
@@ -448,6 +457,21 @@ namespace DocPreview
 
         static char[] wordDelimiters = "\r\t\n ".ToCharArray();
 
+        public static string[] GetParentNamespaces(this string @namespace)
+        {
+            var result = new List<string>();
+            var parts = @namespace.Split('.');
+
+            foreach (var item in parts.Take(parts.Length - 1))
+            {
+                if (result.Any())
+                    result.Add(result.Last() + "." + item);
+                else
+                    result.Add(item);
+            }
+            return result.ToArray();
+        }
+
         public static string[] Words(this string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -456,76 +480,9 @@ namespace DocPreview
             return input.Split(wordDelimiters, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        //public static string[] SplitByLast(this string input, char delimiter)
-        //{
-        //    return input.SplitBySingle(delimiter, true);
-        //}
-
-        //public static string[] SplitByFirst(this string input, char delimiter)
-        //{
-        //    return input.SplitBySingle(delimiter, false);
-        //}
-
-        //static string[] SplitBySingle(this string input, char delimiter, bool last)
-        //{
-        //    if (string.IsNullOrEmpty(input))
-        //        return new string[0];
-
-        // int pos;
-
-        // if (last) pos = input.LastIndexOf(delimiter); else pos = input.IndexOf(delimiter);
-
-        // if (pos != -1) return new string[] { input.Substring(0, pos), input.Substring(pos) };
-
-        //    return new string[] { input };
-        //}
-
-        //public static string[] SplitByFirst(this string input, string delimiter)
-        //{
-        //    return input.SplitBySingle(delimiter, false);
-        //}
-
-        //static string[] SplitBySingle(this string input, string delimiter, bool last)
-        //{
-        //    if (string.IsNullOrEmpty(input))
-        //        return new string[0];
-
-        // int pos;
-
-        // if (last) pos = input.LastIndexOf(delimiter); else pos = input.IndexOf(delimiter);
-
-        // if (pos != -1) { if (pos == 0) return new string[] { input.Substring(pos +
-        // delimiter.Length) }; else if (pos == input.Length - delimiter.Length - 1) return new
-        // string[] { input.Substring(pos) }; else return new string[] { input.Substring(0, pos),
-        // input.Substring(pos + delimiter.Length) };
-
-        //    }
-        //    return new string[] { input };
-        //}
-
-        public static IEnumerable<string> Lines(this string input)
-        {
-            string line;
-            using (var reader = new StringReader(input))
-                while ((line = reader.ReadLine()) != null)
-                    yield return line;
-
-            yield return null;
-        }
-
         public static StringBuilder PrependLine(this StringBuilder sb, string content)
         {
             return sb.Insert(0, content + Environment.NewLine);
-        }
-
-        public static string ToDisplayString(this IEnumerable<TypeParameterDeclaration> parameters)
-        {
-            return parameters.Any() ? "<...>" : "";
-        }
-
-        public static string ToDisplayString(this IEnumerable<ParameterDeclaration> parameters)
-        {
-            return parameters.Any() ? "..." : "";
         }
 
         public static string FormatApiSignature(this string text)
@@ -546,57 +503,9 @@ namespace DocPreview
                        .Replace("  ", " ");
         }
 
-        public static string GetMemberSignature(this AstNode node, string code)
-        {
-            if (node is MethodDeclaration)
-            {
-                var info = (MethodDeclaration)node;
-                return $"Method {info.Name}:{info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
-            }
-            else if (node is TypeDeclaration)
-            {
-                var info = (TypeDeclaration)node;
-                return $"{info.ClassType} {info.Name}:{info.ClassType.ToString().ToLower()} {info.Name}";
-            }
-            else if (node is DelegateDeclaration)
-            {
-                var info = (DelegateDeclaration)node;
-                return $"Delegate {info.Name}:delegate {info.ReturnType} {info.Name}{info.TypeParameters.ToDisplayString()}({info.Parameters.ToDisplayString()})";
-            }
-            else if (node is ConstructorDeclaration)
-            {
-                var info = (ConstructorDeclaration)node;
-                return $"Constructor {info.Name}:{info.Name}({info.Parameters.ToDisplayString()})";
-            }
-            else if (node is PropertyDeclaration)
-            {
-                var info = (PropertyDeclaration)node;
-                return $"Property {info.Name}:{info.ReturnType} {info.Name};";
-            }
-            else if (node is FieldDeclaration)
-            {
-                var info = (FieldDeclaration)node;
-
-                var name = info.Name;
-                if (!name.HasText())
-                    name = code.GetFieldName(info.StartLocation.Line - 1, info.EndLocation.Line - 1);
-
-                return $"Field {name}:{info.ReturnType} {name}";
-            }
-            else if (node is EventDeclaration info)
-            {
-                var name = info.Name;
-                if (!name.HasText())
-                    name = code.GetFieldName(info.StartLocation.Line - 1, info.EndLocation.Line - 1);
-
-                return $"Event {name}:event {info.ReturnType} {name}";
-            }
-            return null;
-        }
-
         public static string GetFieldName(this string code, int startLine, int endLine)
         {
-            var lines = code.Lines().Skip(startLine).Take(endLine - startLine + 1).ToArray();
+            var lines = code.GetLines().Skip(startLine).Take(endLine - startLine + 1).ToArray();
             var declaration = string.Join("", lines).Split(';').First().Trim();
 
             var pos = declaration.Replace("\t", " ").LastIndexOf(' ');
@@ -607,54 +516,23 @@ namespace DocPreview
                 return declaration.Substring(pos).Trim();
         }
 
+        public static XElement ParseAsMultirootXml(this string xml)
+            => XDocument.Parse($"<data>{xml}</data>").Root;
+
         public static bool HasText(this string text)
         {
             return !string.IsNullOrEmpty(text);
         }
 
+        public static T[] ToSingleItemArray<T>(this T text) => new T[] { text };
+
+        public static string JoinBy(this IEnumerable<string> lines, string separator)
+            => string.Join(separator, lines);
+
         public static string[] GetLines(this string text)
-        {
-            return text.Replace(Environment.NewLine, "\n").Split('\n');
-        }
+            => text.Replace(Environment.NewLine, "\n").Split('\n');
 
-        public static string GetNamespace(this EntityDeclaration node)
-        {
-            string result = "";
-
-            var parent = node.Parent;
-            while (parent != null)
-            {
-                if (parent is NamespaceDeclaration)
-                {
-                    if (result.HasText())
-                        result += ".";
-                    result += (parent as NamespaceDeclaration).Name;
-                }
-                parent = parent.Parent;
-            }
-
-            return result;
-        }
-
-        public static IEnumerable<AstNode> DeepAll(this IEnumerable<AstNode> collection, Func<AstNode, bool> selector)
-        {
-            //pseudo recursion
-            var result = new List<AstNode>();
-            var queue = new Queue<AstNode>(collection);
-
-            while (queue.Count > 0)
-            {
-                AstNode node = queue.Dequeue();
-                if (selector(node))
-                    result.Add(node);
-
-                foreach (var subNode in node.Children)
-                {
-                    queue.Enqueue(subNode);
-                }
-            }
-
-            return result;
-        }
+        public static int GetLineFromPosition(this string text, int position)
+            => text.Substring(0, position).GetLines().Count();
     }
 }
