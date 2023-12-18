@@ -30,14 +30,14 @@ Below is the screenshot that illustrates the use of DocPreview:
 
 ## Limitations
 
-DocPreview is designed to be light and it does not aim on building chm files or even to provide ultimately accurate preview rendering of the future documentation. Thus it is not a "compiler" but rather a "linter", which helps avoid misformatted or even invalid XML documentation content with a very short feedback loop. 
+DocPreview is designed to be light and it does not aim to build chm files or even to provide ultimately accurate preview rendering of the future documentation. Thus it is not a "compiler" but rather a "linter", which helps avoid misformatted or even invalid XML documentation content with a very short feedback loop. 
 
 And you may also find that for some more advanced preview scenarios, you may need to go with the higher-grade licensed industrial tools. 
 
 Please note that some of the newer XML Doc tags that have been introduced after the release of this extension will be ignored in the member documentation preview text. Let me know such cases and I will see what can be done. In many cases extending the tag support was relatively easy. Though in some others a significant investment is required (e.g. [#17](https://github.com/oleg-shilo/DocPreview.VSIX/issues/17)) thus I can use your help. But at least vote for the feature requests so I can make the decision to invest in it or not.  
 
 ### `<inheritdoc/>` Limitations
-One of the XML documentation features requires special mentioning - `<inheritdoc/>`. It is a relatively new feature of Sandcastle (~2022). The idea is simple - you can define your XML documentation by pulling multiple XML fragments from other classes' documentation (or even different files). The benefits of these features are debatable as it leads to fragmented less maintainable documentation. Thus GhostDoc (as opposed to Sandcastle) implements documentation "inheritance" by replicating the documentation in the derived classes. 
+One of the XML documentation features requires special mentioning - `<inheritdoc/>`. It is a relatively new feature of Sandcastle (~2022). The idea is simple - you can define your XML documentation by pulling multiple XML fragments from other classes' documentation (or even different files). The benefits of these features are debatable as they lead to fragmented less maintainable documentation. Thus GhostDoc (as opposed to Sandcastle) implements documentation "inheritance" by removing this tag completely from he derived classes (on Ctrl+Shift+D) and replicating it with the  documentation base class documentation content. 
 
 Nevertheless, some developers do rely on `<inheritdoc/>` so starting from v1.6 DocPreview supports previewing `<inheritdoc/>`. Though there are fundamental differences between previewing and compiling documentation: DocPreview analyzes complex and imperfect CodeDom and Sandcastle analyses perfect compiled assemblies). This difference leads to the `<inheritdoc/>` specific limitations:
 
