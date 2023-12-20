@@ -1,3 +1,5 @@
+#region ttt
+
 // using ICSharpCode.NRefactory.CSharp;
 // using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -9,6 +11,11 @@
 
 // using Microsoft.CodeAnalysis.CSharp;
 // using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+#endregion
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,6 +25,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Xml.Linq;
 using System.Xml.XPath;
+
 using ms_CodeAnalysis = Microsoft.CodeAnalysis;
 
 using ms_Syntax = Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -76,6 +84,37 @@ namespace DocPreview
         static string GetXmlDocPrefix(string langage)
         {
             return langage == "Basic" ? "'''" : "///";
+        }
+
+        public static void Test()
+        {
+            var code = @"
+
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+
+            // var items = tree.GetRoot().ChildNodesAndTokens();
+            var items = tree.GetRoot().DescendantTrivia().Where(x => x.IsKind(SyntaxKind.RegionDirectiveTrivia)).ToArray();
+            foreach (var member in items)
+            {
+                try
+                {
+                    var trivia = member;
+                    var region = trivia;
+
+                    var mem = new
+                    {
+                        Line = region.GetLocation().GetLineSpan().StartLinePosition.Line + 0,
+                        Column = region.GetLocation().GetLineSpan().StartLinePosition.Character,
+                        Content = region.ToString().Replace("#region", "").Trim(),
+                        MemberContext = "  --- ",
+                        ContentType = "    ",
+                        IsPublic = true,
+                    };
+                }
+                catch (Exception)
+                {
+                }
+            }
         }
 
         public static Result FindMemberDocumentation(string code, int caretLine, string language = "CSharp")

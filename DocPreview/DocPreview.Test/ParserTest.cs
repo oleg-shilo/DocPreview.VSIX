@@ -4,15 +4,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static DocPreview.PreviewWindowControl;
 using Xunit;
 using Xunit.Abstractions;
-using static DocPreview.PreviewWindowControl;
 
 namespace DocPreview.Test
 {
     public class ParserTest : TestBase
     {
         static string code = File.ReadAllText("GenericClass.cs");
+
+        [Fact]
+        public void PlaygroundTest()
+        {
+            // Parser.Test();
+        }
 
         [Fact]
         public void ParseEvent()

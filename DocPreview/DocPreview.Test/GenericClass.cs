@@ -369,9 +369,13 @@ namespace DocPreview.Test
         int foo(int arg1) { }
     }
 
+    #region rrr
+
     /// <inheritdoc />
     class Test4 : TestBase4
     {
         int foo(int arg1) { }
     }
+
+    #endregion rrr
 }
