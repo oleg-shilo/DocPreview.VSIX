@@ -15,6 +15,12 @@ namespace DocPreview.Test
         static string code = File.ReadAllText("GenericClass.cs");
 
         [Fact]
+        public void PlaygroundTest()
+        {
+            Parser.Test();
+        }
+
+        [Fact]
         public void ParseEvent()
         {
             int line = 17;
