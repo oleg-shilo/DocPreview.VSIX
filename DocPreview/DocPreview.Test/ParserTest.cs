@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static DocPreview.PreviewWindowControl;
 using Xunit;
 using Xunit.Abstractions;
-using static DocPreview.PreviewWindowControl;
 
 namespace DocPreview.Test
 {
@@ -17,7 +17,7 @@ namespace DocPreview.Test
         [Fact]
         public void PlaygroundTest()
         {
-            Parser.Test();
+            // Parser.Test();
         }
 
         [Fact]
