@@ -28,9 +28,22 @@ Below is the screenshot that illustrates the use of DocPreview:
 
 ![](https://github.com/oleg-shilo/DocPreview.VSIX/raw/master/DocPreview/DocPreview/Resources/preview.large.png)
 
+## Customizing appearance
+
+The preview panel renders the preview as HTML content. The theme (css) of the preview matches the theme produced by SandCastle and as such it shows you the final outcome of the help file content as it is going to be displayed when you open the chm file.
+You can adjust your local copy of the css to achieve any desired style.
+- Right-click the preview content and select view source.
+- In the content find the location of the css file(s).
+Now you can modify it to suit your needs.
+
+The extension comes with the predefined Light (default) and Dark themes. You can select the desired theme by right-click on the toolbar of the preview panel:
+
+![image](https://github.com/user-attachments/assets/3e24beec-e886-43a0-abc8-a5492bd2875a)
+
+
 ## Limitations
 
-DocPreview is designed to be light and it does not aim to build chm files or even to provide ultimately accurate preview rendering of the future documentation. Thus it is not a "compiler" but rather a "linter", which helps avoid misformatted or even invalid XML documentation content with a very short feedback loop. 
+DocPreview is designed to be light. It does not aim to build chm files or even to provide an ultimately accurate preview rendering of future documentation. Thus, it is not a "compiler" but rather a "linter," which helps avoid misformatted or even invalid XML documentation content with a very short feedback loop. 
 
 And you may also find that for some more advanced preview scenarios, you may need to go with the higher-grade licensed industrial tools. 
 
