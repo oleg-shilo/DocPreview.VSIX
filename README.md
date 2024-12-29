@@ -36,10 +36,9 @@ You can adjust your local copy of the css to achieve any desired style.
 - In the content find the location of the css file(s).
 Now you can modify it to suit your needs.
 
-The extension comes with the predefined Light (default) and Dark themes. You can select the desired theme by right-click on the toolbar of the preview panel:
+The extension comes with the predefined Light (default) and Dark themes. You can select the desired theme by right-click on the toolbar of the preview panel. You can even use your own custom css file if you prefer to.
 
 ![image](https://github.com/user-attachments/assets/3e24beec-e886-43a0-abc8-a5492bd2875a)
-
 
 ## Limitations
 
